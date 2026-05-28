@@ -10,6 +10,7 @@ from app.api.v1.tags import router as tags_router
 from app.api.v1.admin import router as admin_router
 from app.api.v1.ideations import router as ideations_router
 from app.api.v1.scripts import router as scripts_router
+from app.api.v1.production import router as production_router
 from app.config import settings
 
 app = FastAPI(title="ReelsAssetVault API", version="1.0.0")
@@ -30,6 +31,7 @@ app.include_router(tags_router)
 app.include_router(admin_router)
 app.include_router(ideations_router)
 app.include_router(scripts_router)
+app.include_router(production_router)
 
 # Serve uploaded files and thumbnails as static content
 _storage_root = Path(__file__).resolve().parent.parent.parent / "storage"

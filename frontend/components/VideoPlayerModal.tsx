@@ -85,7 +85,6 @@ export default function VideoPlayerModal({ asset, onClose }: VideoPlayerModalPro
               width="100%"
               height="100%"
               controls
-              playing={false}
               onError={() =>
                 setPlayerError("Unable to load video. The file may be missing or in an unsupported format.")
               }

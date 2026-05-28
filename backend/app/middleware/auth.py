@@ -26,6 +26,26 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
+def require_approver(
+    user_id: str = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> str:
+    """Dependency that allows users with 'admin' OR 'reviewer' role."""
+    from app.models.role import AppRole
+    from app.models.user_role import AppUserRole
+
+    rows = (
+        db.query(AppRole.name)
+        .join(AppUserRole, AppUserRole.role_id == AppRole.id)
+        .filter(AppUserRole.user_id == UUID(user_id))
+        .all()
+    )
+    roles = {r.name for r in rows}
+    if not roles & {"admin", "reviewer"}:
+        raise HTTPException(status_code=403, detail="Approver access required")
+    return user_id
+
+
 def require_admin(
     user_id: str = Depends(get_current_user),
     db: Session = Depends(get_db),

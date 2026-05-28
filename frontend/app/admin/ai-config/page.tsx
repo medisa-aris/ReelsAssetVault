@@ -137,7 +137,7 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
           <div>
             <dt className="text-xs text-gray-400 font-medium">API Key</dt>
             <dd className="text-gray-700 font-mono text-xs mt-0.5">
-              {config.api_key_masked ? config.api_key_masked : <span className="italic text-gray-400">not set</span>}
+              {config.api_key ? config.api_key : <span className="italic text-gray-400">not set</span>}
             </dd>
           </div>
           {showBaseUrl && (
@@ -158,7 +158,7 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder={config.api_key_masked ? "Leave blank to keep current" : "Enter API key…"}
+              placeholder={config.api_key ? "Leave blank to keep current" : "Enter API key…"}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
