@@ -1,0 +1,18 @@
+{
+  "name": "reelsvault-e2e",
+  "version": "1.0.0",
+  "description": "End-to-end and API tests for ReelsAssetVault",
+  "scripts": {
+    "test": "playwright test",
+    "test:auth": "playwright test auth",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "@types/jsonwebtoken": "^9.0.6",
+    "dotenv": "^16.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "typescript": "^6.0.3"
+  }
+}

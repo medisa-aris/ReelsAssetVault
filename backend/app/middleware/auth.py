@@ -8,10 +8,14 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 
-def get_current_user(token: HTTPAuthorizationCredentials = Depends(security)) -> str:
+def get_current_user(
+    token: HTTPAuthorizationCredentials | None = Depends(security),
+) -> str:
+    if token is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         payload = jwt.decode(token.credentials, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str | None = payload.get("sub")

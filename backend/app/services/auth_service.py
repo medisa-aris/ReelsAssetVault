@@ -48,10 +48,12 @@ def _user_response(user: AppUser, roles: list[str]) -> UserResponse:
 
 
 def register(db: Session, data: RegisterRequest) -> dict:
-    if db.query(AppUser).filter(AppUser.email == data.email).first():
+    # Normalise email to lowercase to prevent case-insensitive duplicate accounts (TC-018)
+    normalised_email = data.email.lower()
+    if db.query(AppUser).filter(AppUser.email == normalised_email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    user = AppUser(email=data.email, full_name=data.full_name, password=_hash_password(data.password))
+    user = AppUser(email=normalised_email, full_name=data.full_name, password=_hash_password(data.password))
     db.add(user)
     db.flush()
 
@@ -71,7 +73,7 @@ def register(db: Session, data: RegisterRequest) -> dict:
 
 
 def login(db: Session, data: LoginRequest) -> dict:
-    user = db.query(AppUser).filter(AppUser.email == data.email).first()
+    user = db.query(AppUser).filter(AppUser.email == data.email.lower()).first()
     if not user or not _verify_password(data.password, user.password) or not user.is_active:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
