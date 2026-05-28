@@ -2,10 +2,12 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Navigation from "@/components/Navigation";
 import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 
 export default function DashboardPage() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-gray-500">Loading…</p>
       </div>
     );
   }
@@ -26,28 +28,28 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900">ReelsAssetVault</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">{user.full_name}</span>
-          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">
-            {user.roles.join(", ")}
-          </span>
-          <button
-            onClick={logout}
-            className="text-sm text-red-600 hover:text-red-800 font-medium"
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-      <main className="max-w-4xl mx-auto p-8">
-        <h2 className="text-2xl font-semibold text-gray-800">
+      <Navigation />
+      <main className="max-w-4xl mx-auto px-6 py-16 text-center">
+        <h2 className="text-3xl font-bold text-gray-900">
           Welcome, {user.full_name}!
         </h2>
-        <p className="mt-2 text-gray-500">
-          Your asset library is empty. Upload your first video to get started.
+        <p className="mt-3 text-gray-500 text-base">
+          ReelsAssetVault is your central library for short-form video assets.
         </p>
+        <div className="mt-8 flex justify-center gap-4">
+          <Link
+            href="/video"
+            className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+          >
+            Browse Library
+          </Link>
+          <Link
+            href="/video/upload"
+            className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors"
+          >
+            Upload Video
+          </Link>
+        </div>
       </main>
     </div>
   );

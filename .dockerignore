@@ -1,0 +1,40 @@
+# Version control
+.git
+.gitignore
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache
+**/venv
+**/.venv
+**/*.egg-info
+
+# Node / Next.js
+**/node_modules
+frontend/.next
+frontend/out
+
+# Storage (video files — handled by Docker volume, not image)
+storage/
+
+# Environment files (never bake secrets into the image)
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Docs / IDE
+docs/
+.vscode/
+.idea/
+*.md
+!README.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/

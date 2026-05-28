@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ReelsAssetVault — uploaded video files and generated thumbnails
+storage/uploads/*/
+# Keep the directory itself via .gitkeep
+
+# Node
+frontend/node_modules/
+frontend/.next/

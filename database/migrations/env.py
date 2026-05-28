@@ -10,7 +10,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "backend"
 
 from app.config import settings
 from app.database import Base
-from app.models import AppUser, AppRole, AppUserRole  # noqa: F401 — registers models with Base
+from app.models import AppUser, AppRole, AppUserRole, AppAsset, AppTag, app_asset_tags  # noqa: F401 — registers models with Base
+from app.models import AppAiConfig, AppIdeation, AppScript, app_ideation_tags  # noqa: F401
 
 config = context.config
 
