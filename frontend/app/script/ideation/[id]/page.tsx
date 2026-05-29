@@ -72,8 +72,8 @@ export default function IdeationDetailPage({ params }: Props) {
       <>
         <Navigation />
         <PageLayout maxWidth="md">
-          <div className="flex items-center justify-center h-64">
-            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "16rem" }}>
+            <p style={{ color: "var(--cds-text-secondary)", fontSize: "0.875rem" }}>Loading…</p>
           </div>
         </PageLayout>
       </>
@@ -86,7 +86,7 @@ export default function IdeationDetailPage({ params }: Props) {
         <Navigation />
         <PageLayout maxWidth="md">
           <InlineNotification kind="error" title={error ?? "Ideation not found."} />
-          <Link href="/script/ideation" className="mt-4 inline-block text-sm text-indigo-600 hover:underline">
+          <Link href="/script/ideation" style={{ marginTop: "1rem", display: "inline-block", fontSize: "0.875rem", color: "#0f62fe" }}>
             ← Back to Ideation
           </Link>
         </PageLayout>
@@ -99,41 +99,42 @@ export default function IdeationDetailPage({ params }: Props) {
       <Navigation />
       <PageLayout maxWidth="md">
         {/* Breadcrumb + toggle */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Link href="/script/ideation" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+            <Link href="/script/ideation" style={{ fontSize: "0.875rem", color: "var(--cds-text-secondary)", whiteSpace: "nowrap" }}>
               ← Ideation
             </Link>
-            <span className="text-gray-300">/</span>
-            <h1 className="text-xl font-bold text-gray-900 truncate max-w-xs">{ideation.title}</h1>
+            <span style={{ color: "#c6c6c6" }}>/</span>
+            <h1 style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--cds-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "20rem" }}>
+              {ideation.title}
+            </h1>
           </div>
           <SegmentedToggle value={mode} onChange={setMode} />
         </div>
 
         {/* Meta row */}
         {mode === "view" && (
-          <div className="flex flex-wrap items-center gap-3 mb-5">
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px", marginBottom: "1.25rem" }}>
             <StatusBadge status={ideation.status} />
             {ideation.is_ai_generated && (
-              <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded font-medium">AI Generated</span>
+              <span style={{ fontSize: "0.75rem", backgroundColor: "#f0e6ff", color: "#6929c4", padding: "2px 8px", borderRadius: "4px", fontWeight: 500 }}>
+                AI Generated
+              </span>
             )}
             {ideation.platform && (
-              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{ideation.platform}</span>
+              <span style={{ fontSize: "0.75rem", backgroundColor: "#e0e0e0", color: "#525252", padding: "2px 8px", borderRadius: "4px" }}>
+                {ideation.platform}
+              </span>
             )}
             {ideation.upload_date && (
-              <span className="text-xs text-gray-500">📅 {formatDate(ideation.upload_date)}</span>
+              <span style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)" }}>📅 {formatDate(ideation.upload_date)}</span>
             )}
             {ideation.upload_time && (
-              <span className="text-xs text-gray-500">🕐 {ideation.upload_time}</span>
+              <span style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)" }}>🕐 {ideation.upload_time}</span>
             )}
-            <div className="ml-auto flex items-center gap-2">
+            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "8px" }}>
               <LanguageToggle value={scriptLanguage} onChange={setScriptLanguage} />
-              <Button
-                kind="primary"
-                size="sm"
-                onClick={handleGenerateScript}
-                disabled={generating}
-              >
+              <Button kind="primary" size="sm" onClick={handleGenerateScript} disabled={generating}>
                 {generating ? "Generating…" : "Generate Script"}
               </Button>
             </div>
@@ -146,11 +147,12 @@ export default function IdeationDetailPage({ params }: Props) {
             kind="error"
             title={generateError}
             onCloseButtonClick={() => setGenerateError(null)}
-            className="mb-4"
+            style={{ marginBottom: "1rem" }}
           />
         )}
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        {/* Content card */}
+        <div style={{ backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #e0e0e0", padding: "1.5rem" }}>
           {mode === "edit" ? (
             <IdeationForm initial={ideation} onSubmit={handleSave} submitLabel="Save Changes" loading={saving} />
           ) : (
@@ -163,15 +165,35 @@ export default function IdeationDetailPage({ params }: Props) {
 }
 
 function IdeationViewFields({ ideation }: { ideation: Ideation }) {
+  const labelStyle: React.CSSProperties = {
+    fontSize: "0.75rem",
+    fontWeight: 600,
+    color: "var(--cds-text-secondary)",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    marginBottom: "4px",
+  };
+
+  const valueStyle: React.CSSProperties = {
+    fontSize: "0.875rem",
+    color: "var(--cds-text-primary)",
+    whiteSpace: "pre-wrap",
+  };
+
+  const emptyStyle: React.CSSProperties = {
+    color: "var(--cds-text-placeholder)",
+    fontStyle: "italic",
+  };
+
   const field = (label: string, value: string | null | undefined) => (
-    <div key={label}>
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{label}</p>
-      <p className="text-sm text-gray-800 whitespace-pre-wrap">{value || <span className="text-gray-400 italic">—</span>}</p>
+    <div key={label} style={{ marginBottom: "1.25rem" }}>
+      <p style={labelStyle}>{label}</p>
+      <p style={valueStyle}>{value || <span style={emptyStyle}>—</span>}</p>
     </div>
   );
 
   return (
-    <div className="space-y-5">
+    <div>
       {field("Niche", ideation.niche)}
       {field("Target Audience", ideation.target_audience)}
       {field("Posting Frequency", ideation.posting_frequency)}
@@ -182,17 +204,19 @@ function IdeationViewFields({ ideation }: { ideation: Ideation }) {
       {field("Notes", ideation.notes)}
 
       {ideation.tags.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Tags</p>
-          <div className="flex flex-wrap gap-1.5">
+        <div style={{ marginBottom: "1.25rem" }}>
+          <p style={labelStyle}>Tags</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
             {ideation.tags.map((t) => (
-              <span key={t.id} className="px-2.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">{t.name}</span>
+              <span key={t.id} style={{ padding: "2px 10px", backgroundColor: "#e0e0e0", color: "#525252", borderRadius: "9999px", fontSize: "0.75rem" }}>
+                {t.name}
+              </span>
             ))}
           </div>
         </div>
       )}
 
-      <div className="pt-2 border-t border-gray-100 text-xs text-gray-400 space-y-1">
+      <div style={{ paddingTop: "8px", borderTop: "1px solid #e0e0e0", fontSize: "0.75rem", color: "var(--cds-text-secondary)", display: "flex", flexDirection: "column", gap: "4px" }}>
         <p>Created: {new Date(ideation.created_at).toLocaleString()}</p>
         {ideation.updated_by_name && <p>Last edited by: {ideation.updated_by_name}</p>}
       </div>

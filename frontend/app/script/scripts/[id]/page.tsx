@@ -109,8 +109,8 @@ export default function ScriptDetailPage({ params }: Props) {
       <>
         <Navigation />
         <PageLayout maxWidth="md">
-          <div className="flex items-center justify-center h-64">
-            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "16rem" }}>
+            <p style={{ color: "var(--cds-text-secondary)", fontSize: "0.875rem" }}>Loading…</p>
           </div>
         </PageLayout>
       </>
@@ -123,7 +123,7 @@ export default function ScriptDetailPage({ params }: Props) {
         <Navigation />
         <PageLayout maxWidth="md">
           <InlineNotification kind="error" title={error ?? "Script not found."} />
-          <Link href="/script/scripts" className="mt-4 inline-block text-sm text-indigo-600 hover:underline">
+          <Link href="/script/scripts" style={{ marginTop: "1rem", display: "inline-block", fontSize: "0.875rem", color: "#0f62fe" }}>
             ← Back to Scripts
           </Link>
         </PageLayout>
@@ -136,15 +136,17 @@ export default function ScriptDetailPage({ params }: Props) {
       <Navigation />
       <PageLayout maxWidth="md">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Link href="/script/scripts" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+            <Link href="/script/scripts" style={{ fontSize: "0.875rem", color: "var(--cds-text-secondary)", whiteSpace: "nowrap" }}>
               ← Scripts
             </Link>
-            <span className="text-gray-300">/</span>
-            <h1 className="text-xl font-bold text-gray-900 truncate max-w-xs">{displayScript.title}</h1>
+            <span style={{ color: "#c6c6c6" }}>/</span>
+            <h1 style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--cds-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "20rem" }}>
+              {displayScript.title}
+            </h1>
             {displayScript.is_ai_generated && (
-              <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded font-medium">AI</span>
+              <span style={{ fontSize: "0.75rem", backgroundColor: "#f0e6ff", color: "#6929c4", padding: "2px 6px", borderRadius: "4px", fontWeight: 500, whiteSpace: "nowrap" }}>AI</span>
             )}
           </div>
           <SegmentedToggle value={mode} onChange={(m) => { setMode(m); if (m === "view") setEdits({}); }} />
@@ -152,25 +154,19 @@ export default function ScriptDetailPage({ params }: Props) {
 
         {/* Source ideation link */}
         {displayScript.ideation_title && (
-          <p className="text-sm text-gray-500 mb-5">
+          <p style={{ fontSize: "0.875rem", color: "var(--cds-text-secondary)", marginBottom: "1.25rem" }}>
             From ideation:{" "}
-            <Link href={`/script/ideation/${displayScript.ideation_id}`} className="text-indigo-600 hover:underline">
+            <Link href={`/script/ideation/${displayScript.ideation_id}`} style={{ color: "#0f62fe" }}>
               {displayScript.ideation_title}
             </Link>
           </p>
         )}
 
         {/* Export bar */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-xs text-gray-500 font-medium">Export:</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "1rem" }}>
+          <span style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)", fontWeight: 500 }}>Export:</span>
           {(["txt", "md", "pdf"] as ExportFormat[]).map((fmt) => (
-            <Button
-              key={fmt}
-              kind="ghost"
-              size="sm"
-              onClick={() => handleExport(fmt)}
-              disabled={exporting !== null}
-            >
+            <Button key={fmt} kind="ghost" size="sm" onClick={() => handleExport(fmt)} disabled={exporting !== null}>
               {exporting === fmt ? "…" : fmt.toUpperCase()}
             </Button>
           ))}
@@ -185,7 +181,7 @@ export default function ScriptDetailPage({ params }: Props) {
             kind="error"
             title={exportError}
             onCloseButtonClick={() => setExportError(null)}
-            className="mb-4"
+            style={{ marginBottom: "1rem" }}
           />
         )}
         {saveError && (
@@ -193,21 +189,17 @@ export default function ScriptDetailPage({ params }: Props) {
             kind="error"
             title={saveError}
             onCloseButtonClick={() => setSaveError(null)}
-            className="mb-4"
+            style={{ marginBottom: "1rem" }}
           />
         )}
 
         {/* Script content */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div style={{ backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #e0e0e0", padding: "1.5rem" }}>
           {mode === "edit" ? (
             <>
               <ScriptSections mode="edit" script={displayScript} onChange={handleChange} />
-              <div className="mt-6 flex justify-end gap-3">
-                <Button
-                  kind="ghost"
-                  size="sm"
-                  onClick={() => { setEdits({}); setMode("view"); setSaveError(null); }}
-                >
+              <div style={{ marginTop: "1.5rem", display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+                <Button kind="ghost" size="sm" onClick={() => { setEdits({}); setMode("view"); setSaveError(null); }}>
                   Cancel
                 </Button>
                 <Button kind="primary" size="sm" onClick={handleSave} disabled={saving}>
@@ -221,7 +213,7 @@ export default function ScriptDetailPage({ params }: Props) {
         </div>
 
         {/* Footer meta */}
-        <div className="mt-4 text-xs text-gray-400 space-y-0.5">
+        <div style={{ marginTop: "1rem", fontSize: "0.75rem", color: "var(--cds-text-secondary)", display: "flex", flexDirection: "column", gap: "2px" }}>
           <p>Created: {new Date(displayScript.created_at).toLocaleString()}</p>
           {displayScript.updated_by_name && <p>Last edited by: {displayScript.updated_by_name}</p>}
         </div>

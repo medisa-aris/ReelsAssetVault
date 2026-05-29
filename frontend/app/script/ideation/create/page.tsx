@@ -27,19 +27,19 @@ export default function CreateIdeationPage() {
     <>
       <Navigation />
       <PageLayout maxWidth="md">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+        {/* Header — 10px margin after title (no subtitle) */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
           <Link
             href="/script/ideation"
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            style={{ fontSize: "0.875rem", color: "var(--cds-text-secondary)" }}
           >
             ← Ideation
           </Link>
-          <span className="text-gray-300">/</span>
+          <span style={{ color: "#c6c6c6" }}>/</span>
           <h1 className="cds--type-productive-heading-04">Create Ideation</h1>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div style={{ backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #e0e0e0", padding: "1.5rem" }}>
           <IdeationForm onSubmit={handleSubmit} submitLabel="Create Ideation" loading={saving} />
         </div>
       </PageLayout>

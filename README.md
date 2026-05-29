@@ -40,7 +40,7 @@ Built with **Next.js 14**, **Python (FastAPI)**, and **PostgreSQL**.
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | Next.js 14, TypeScript, Tailwind CSS |
+| **Frontend** | Next.js 14, TypeScript, IBM Carbon Design System v11 |
 | **Backend** | Python 3.x, FastAPI |
 | **Database** | PostgreSQL + Alembic migrations |
 | **AI SDKs** | `anthropic` (Claude), `openai` (ChatGPT / Ollama / Kimi) |
@@ -181,6 +181,8 @@ Full API docs: `http://localhost:8000/docs` (Swagger UI)
 - [x] Script output language: English / Bahasa Indonesia
 - [x] Script export: .txt, .md, PDF, copy to clipboard
 - [x] Admin AI config page (Claude, ChatGPT, Ollama, Kimi)
+- [x] Publish Schedule — plan, submit, approve/reject, and advance content through Draft → Pending Review → Approved → Scheduled → Published
+- [x] IBM Carbon Design System v11 UI (migrated from Tailwind CSS)
 
 ### Planned
 - [ ] Cloud storage (S3 / MinIO)

@@ -80,13 +80,45 @@ ReelsAssetVault follows a **three-tier architecture**:
 
 | Layer | Technology | Why |
 |-------|-----------|-----|
-| **Frontend** | Next.js + TypeScript | Server-side rendering, great dev experience, built-in API routes for future |
-| | Tailwind CSS | Utility-first styling, rapid development, maintainable design system |
+| **Frontend** | Next.js 14 + TypeScript | Server-side rendering, great dev experience, App Router |
+| | IBM Carbon Design System v11 | Enterprise-grade component library; replaces Tailwind CSS |
 | **Backend** | Python + FastAPI | Fast (async), great for media processing, automatic API docs, easy to extend |
 | | PostgreSQL | Reliable ACID transactions, great for relational data (assets, tags, users) |
 | **Storage** | Local (initial) | Simplicity for development and MVP |
 | | S3/MinIO (planned) | Scalability, production readiness, cloud-native architecture |
 | **DevOps** | Docker (planned) | Consistency across environments, easy deployment |
+
+### Frontend Styling Rules
+
+**Tailwind CSS has been removed.** Do not add Tailwind utility classes to any file — they have no effect.
+
+Use this order of preference for styles:
+
+1. **Carbon components** (`@carbon/react`) — `Button`, `TextInput`, `TextArea`, `Select`, `DataTable`, `Tile`, `Search`, `Dropdown`, etc.
+2. **Carbon type tokens** — `className="cds--type-productive-heading-04"` and similar for headings.
+3. **Inline `style={{}}`** — for layout, spacing, colours, and anything not covered by a Carbon component.
+4. **`carbon-overrides.css`** — targeted global overrides only (e.g. header theme, password toggle alignment).
+
+**Key patterns:**
+```tsx
+// Layout — use inline style, not Tailwind
+<div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1rem" }}>
+
+// Cards / panels
+<div style={{ backgroundColor: "#fff", border: "1px solid #e0e0e0", borderRadius: "12px", padding: "1.5rem" }}>
+
+// Form inputs — use Carbon components, not raw <input>/<textarea>
+<TextInput id="..." labelText="..." value={v} onChange={(e) => set(e.target.value)} />
+<TextArea  id="..." labelText="..." value={v} onChange={(e) => set(e.target.value)} rows={3} />
+
+// Date / time — use TextInput with type="date" / "time" (avoids flatpickr sync issues)
+<TextInput id="..." labelText="Date" type="date" value={v} onChange={(e) => set(e.target.value)} />
+
+// Carbon colour tokens for text
+color: "var(--cds-text-primary)"
+color: "var(--cds-text-secondary)"
+color: "var(--cds-text-placeholder)"
+```
 
 ---
 

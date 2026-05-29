@@ -20,7 +20,6 @@ import {
   Tag,
 } from "@carbon/react";
 import { Add, Download } from "@carbon/icons-react";
-import Link from "next/link";
 import EditMetadataModal from "@/components/EditMetadataModal";
 import VideoPlayerModal from "@/components/VideoPlayerModal";
 import { formatDuration, formatFileSize, formatResolution, formatDate, storageUrl } from "@/lib/utils";
@@ -100,7 +99,7 @@ export default function VideoTable({
           >
             <TableToolbar>
               <TableToolbarContent>
-                <Button renderIcon={Add} as={Link} href="/video/upload" size="sm">
+                <Button renderIcon={Add} href="/video/upload" size="sm">
                   Add New Video
                 </Button>
               </TableToolbarContent>

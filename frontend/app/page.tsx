@@ -19,8 +19,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Loading…</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
+        <p style={{ color: "var(--cds-text-secondary)" }}>Loading...</p>
       </div>
     );
   }
@@ -31,14 +31,14 @@ export default function DashboardPage() {
     <>
       <Navigation />
       <PageLayout maxWidth="max">
-        <div className="py-8 text-center">
-          <h2 className="cds--type-productive-heading-04">
+        <div style={{ padding: "2rem 0" }}>
+          <h2 className="cds--type-productive-heading-04" style={{ marginLeft: "10px" }}>
             Welcome, {user.full_name}!
           </h2>
-          <p className="mt-3 text-gray-500 text-base">
+          <p style={{ marginTop: "0.75rem", marginLeft: "10px", color: "var(--cds-text-secondary)", fontSize: "1rem" }}>
             ReelsAssetVault is your central library for short-form video assets.
           </p>
-          <div className="mt-8 flex justify-center gap-4">
+          <div style={{ marginTop: "2rem", marginLeft: "10px", display: "flex", gap: "1rem" }}>
             <Button kind="primary" onClick={() => router.push("/video")}>
               Browse Library
             </Button>

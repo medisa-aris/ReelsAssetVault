@@ -18,7 +18,9 @@ export default function Navigation() {
   const isAdmin = user?.roles?.includes("admin") ?? false;
 
   return (
-    <Header aria-label="ReelsAssetVault">
+    // data-carbon-theme="g100" applies the dark (Gray 100) shell theme
+    // giving the header the dark #161616 background used in enterprise apps
+    <Header aria-label="ReelsAssetVault" data-carbon-theme="g100">
       <SkipToContent />
       <HeaderName href="/" prefix="">
         ReelsAssetVault
@@ -60,7 +62,7 @@ export default function Navigation() {
                 alignItems: "center",
                 padding: "0 1rem",
                 fontSize: "0.875rem",
-                color: "var(--cds-text-secondary)",
+                color: "#c6c6c6",
                 whiteSpace: "nowrap",
               }}
             >
