@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/PageLayout";
+import { useNotification } from "@/components/NotificationProvider";
+import { Button, InlineNotification } from "@carbon/react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { PublishSchedule } from "@/lib/types";
@@ -16,6 +19,7 @@ export default function ScheduleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
+  const { notify } = useNotification();
 
   const isApprover = user?.roles?.some((r) => r === "admin" || r === "reviewer") ?? false;
 
@@ -65,7 +69,7 @@ export default function ScheduleDetailPage() {
       setEditMode(false);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to save";
-      alert(msg);
+      notify("error", "Save Failed", msg);
     } finally {
       setSaving(false);
     }
@@ -77,7 +81,7 @@ export default function ScheduleDetailPage() {
       await fetchSchedule();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to submit";
-      alert(msg);
+      notify("error", "Submit Failed", msg);
     }
   };
 
@@ -87,7 +91,7 @@ export default function ScheduleDetailPage() {
       await fetchSchedule();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to approve";
-      alert(msg);
+      notify("error", "Approval Failed", msg);
     }
   };
 
@@ -99,7 +103,7 @@ export default function ScheduleDetailPage() {
       await fetchSchedule();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to reject";
-      alert(msg);
+      notify("error", "Rejection Failed", msg);
     }
   };
 
@@ -109,7 +113,7 @@ export default function ScheduleDetailPage() {
       await fetchSchedule();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to advance";
-      alert(msg);
+      notify("error", "Status Update Failed", msg);
     }
   };
 
@@ -120,7 +124,7 @@ export default function ScheduleDetailPage() {
       router.push("/production/schedule");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to delete";
-      alert(msg);
+      notify("error", "Delete Failed", msg);
     }
   };
 
@@ -128,9 +132,9 @@ export default function ScheduleDetailPage() {
     return (
       <>
         <Navigation />
-        <div className="max-w-3xl mx-auto px-6 py-8">
+        <PageLayout maxWidth="md">
           <p className="text-gray-500">Loading...</p>
-        </div>
+        </PageLayout>
       </>
     );
   }
@@ -139,12 +143,12 @@ export default function ScheduleDetailPage() {
     return (
       <>
         <Navigation />
-        <div className="max-w-3xl mx-auto px-6 py-8">
+        <PageLayout maxWidth="md">
           <p className="text-red-500">{error ?? "Schedule not found"}</p>
           <Link href="/production/schedule" className="text-indigo-600 hover:underline text-sm mt-2 block">
             Back to schedules
           </Link>
-        </div>
+        </PageLayout>
       </>
     );
   }
@@ -155,7 +159,7 @@ export default function ScheduleDetailPage() {
   return (
     <>
       <Navigation />
-      <div className="max-w-3xl mx-auto px-6 py-8">
+      <PageLayout maxWidth="md">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/production/schedule" className="text-gray-400 hover:text-gray-600">
@@ -164,39 +168,39 @@ export default function ScheduleDetailPage() {
           </svg>
         </Link>
         <div className="flex-1 flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-900">Schedule Detail</h1>
+          <h1 className="cds--type-productive-heading-04">Schedule Detail</h1>
           <ScheduleStatusBadge status={schedule.status} />
         </div>
 
         {/* View / Edit toggle */}
         {canEdit && (
           <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-1">
-            <button
+            <Button
+              kind={!editMode ? "secondary" : "ghost"}
+              size="sm"
               onClick={() => setEditMode(false)}
-              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                !editMode ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-              }`}
             >
               View
-            </button>
-            <button
+            </Button>
+            <Button
+              kind={editMode ? "secondary" : "ghost"}
+              size="sm"
               onClick={() => setEditMode(true)}
-              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                editMode ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-              }`}
             >
               Edit
-            </button>
+            </Button>
           </div>
         )}
       </div>
 
       {/* Rejection reason */}
       {schedule.rejection_reason && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-          <p className="text-sm font-medium text-red-700">Rejected</p>
-          <p className="text-sm text-red-600 mt-1">{schedule.rejection_reason}</p>
-        </div>
+        <InlineNotification
+          kind="error"
+          title="Rejected"
+          subtitle={schedule.rejection_reason}
+          className="mb-4"
+        />
       )}
 
       <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col gap-6">
@@ -293,19 +297,12 @@ export default function ScheduleDetailPage() {
             </div>
 
             <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
-              <button
-                onClick={() => setEditMode(false)}
-                className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
+              <Button kind="ghost" size="sm" onClick={() => setEditMode(false)}>
                 Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-              >
+              </Button>
+              <Button kind="primary" size="sm" onClick={handleSave} disabled={saving}>
                 {saving ? "Saving…" : "Save Changes"}
-              </button>
+              </Button>
             </div>
           </>
         ) : (
@@ -365,62 +362,44 @@ export default function ScheduleDetailPage() {
         <div className="mt-6 flex flex-wrap items-center gap-3">
           {/* Submit (Draft or Rejected) */}
           {(schedule.status === "Draft" || schedule.status === "Rejected") && (
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
+            <Button kind="primary" size="sm" onClick={handleSubmit}>
               Submit for Review
-            </button>
+            </Button>
           )}
 
           {/* Approver actions */}
           {isApprover && schedule.status === "Pending Review" && (
             <>
-              <button
-                onClick={handleApprove}
-                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
-              >
+              <Button kind="primary" size="sm" onClick={handleApprove}>
                 Approve
-              </button>
-              <button
-                onClick={handleReject}
-                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
-              >
+              </Button>
+              <Button kind="danger" size="sm" onClick={handleReject}>
                 Reject
-              </button>
+              </Button>
             </>
           )}
 
           {isApprover && schedule.status === "Approved" && (
-            <button
-              onClick={() => handleAdvance("Scheduled")}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
+            <Button kind="primary" size="sm" onClick={() => handleAdvance("Scheduled")}>
               Mark Scheduled
-            </button>
+            </Button>
           )}
 
           {isApprover && schedule.status === "Scheduled" && (
-            <button
-              onClick={() => handleAdvance("Published")}
-              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-            >
+            <Button kind="primary" size="sm" onClick={() => handleAdvance("Published")}>
               Mark Published
-            </button>
+            </Button>
           )}
 
           {/* Delete (only unlocked) */}
           {!isLocked && (
-            <button
-              onClick={handleDelete}
-              className="px-4 py-2 border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors ml-auto"
-            >
+            <Button kind="danger--ghost" size="sm" onClick={handleDelete} className="ml-auto">
               Delete
-            </button>
+            </Button>
           )}
         </div>
       )}
-    </div>
+    </PageLayout>
     </>
   );
 }

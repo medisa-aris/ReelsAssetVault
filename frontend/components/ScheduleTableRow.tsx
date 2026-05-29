@@ -1,10 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { PublishSchedule } from "@/lib/types";
-import ScheduleStatusBadge from "@/components/ScheduleStatusBadge";
+import {
+  TableCell,
+  Button,
+  ComposedModal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  TextArea,
+} from "@carbon/react";
 import { api } from "@/lib/api";
 import { storageUrl } from "@/lib/utils";
+import ScheduleStatusBadge from "@/components/ScheduleStatusBadge";
+import { useNotification } from "@/components/NotificationProvider";
+import type { PublishSchedule } from "@/lib/types";
 
 interface ScheduleTableRowProps {
   schedule: PublishSchedule;
@@ -13,13 +24,17 @@ interface ScheduleTableRowProps {
 }
 
 export default function ScheduleTableRow({ schedule, isApprover, onStatusUpdate }: ScheduleTableRowProps) {
+  const { notify } = useNotification();
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+
   const handleSubmit = async () => {
     try {
       await api.patch(`/production/schedules/${schedule.id}/submit`);
       onStatusUpdate();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to submit";
-      alert(msg);
+      notify("error", "Submit failed", msg);
     }
   };
 
@@ -29,19 +44,20 @@ export default function ScheduleTableRow({ schedule, isApprover, onStatusUpdate 
       onStatusUpdate();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to approve";
-      alert(msg);
+      notify("error", "Approve failed", msg);
     }
   };
 
-  const handleReject = async () => {
-    const reason = prompt("Rejection reason:");
-    if (!reason) return;
+  const handleRejectConfirm = async () => {
+    if (!rejectReason.trim()) return;
     try {
-      await api.patch(`/production/schedules/${schedule.id}/reject`, { reason });
+      await api.patch(`/production/schedules/${schedule.id}/reject`, { reason: rejectReason });
+      setRejectOpen(false);
+      setRejectReason("");
       onStatusUpdate();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Failed to reject";
-      alert(msg);
+      notify("error", "Reject failed", msg);
     }
   };
 
@@ -52,86 +68,106 @@ export default function ScheduleTableRow({ schedule, isApprover, onStatusUpdate 
     : "-";
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors">
-      {/* Thumbnail */}
-      <td className="px-4 py-3 w-14">
-        {schedule.asset_thumbnail_url ? (
-          <img
-            src={storageUrl(schedule.asset_thumbnail_url) ?? ""}
-            alt={schedule.asset_title ?? ""}
-            className="w-12 h-12 object-cover rounded"
-          />
-        ) : (
-          <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">
-            No img
+    <>
+      <tr style={{ borderBottom: "1px solid var(--cds-border-subtle-01)" }}>
+        {/* Asset thumbnail */}
+        <TableCell>
+          {schedule.asset_thumbnail_url ? (
+            <img
+              src={storageUrl(schedule.asset_thumbnail_url) ?? ""}
+              alt={schedule.asset_title ?? ""}
+              style={{ width: "3rem", height: "3rem", objectFit: "cover", borderRadius: "4px" }}
+            />
+          ) : (
+            <div style={{ width: "3rem", height: "3rem", background: "var(--cds-layer-02)", borderRadius: "4px" }} />
+          )}
+        </TableCell>
+
+        {/* Caption + ideation */}
+        <TableCell>
+          <p style={{ fontSize: "0.875rem", color: "var(--cds-text-primary)" }}>{captionPreview}</p>
+          {schedule.ideation_title && (
+            <p style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)" }}>
+              Ideation: {schedule.ideation_title}
+            </p>
+          )}
+          {schedule.asset_title && (
+            <p style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)" }}>
+              Asset: {schedule.asset_title}
+            </p>
+          )}
+          {schedule.rejection_reason && (
+            <p style={{ fontSize: "0.75rem", color: "var(--cds-support-error)", marginTop: "0.25rem" }}
+              title={schedule.rejection_reason}>
+              {schedule.rejection_reason.slice(0, 60)}{schedule.rejection_reason.length > 60 ? "..." : ""}
+            </p>
+          )}
+        </TableCell>
+
+        {/* Scheduled */}
+        <TableCell>
+          <span style={{ fontSize: "0.875rem", whiteSpace: "nowrap" }}>{schedule.scheduled_date}</span>
+          <span style={{ display: "block", fontSize: "0.75rem", color: "var(--cds-text-secondary)" }}>
+            {schedule.scheduled_time}
+          </span>
+        </TableCell>
+
+        {/* Status */}
+        <TableCell>
+          <ScheduleStatusBadge status={schedule.status} />
+        </TableCell>
+
+        {/* Actions */}
+        <TableCell>
+          <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+            <Button kind="ghost" size="sm" as={Link} href={`/production/schedule/${schedule.id}`}>
+              View
+            </Button>
+
+            {(schedule.status === "Draft" || schedule.status === "Rejected") && (
+              <Button kind="ghost" size="sm" onClick={handleSubmit}>
+                Submit
+              </Button>
+            )}
+
+            {schedule.status === "Pending Review" && isApprover && (
+              <>
+                <Button kind="primary" size="sm" onClick={handleApprove}>
+                  Approve
+                </Button>
+                <Button kind="danger--ghost" size="sm" onClick={() => setRejectOpen(true)}>
+                  Reject
+                </Button>
+              </>
+            )}
           </div>
-        )}
-      </td>
+        </TableCell>
+      </tr>
 
-      {/* Caption + ideation */}
-      <td className="px-4 py-3">
-        <p className="text-sm text-gray-900">{captionPreview}</p>
-        {schedule.ideation_title && (
-          <p className="text-xs text-gray-500 mt-0.5">Ideation: {schedule.ideation_title}</p>
-        )}
-        {schedule.asset_title && (
-          <p className="text-xs text-gray-500">Asset: {schedule.asset_title}</p>
-        )}
-      </td>
-
-      {/* Scheduled date */}
-      <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
-        {schedule.scheduled_date}
-        <span className="block text-xs text-gray-400">{schedule.scheduled_time}</span>
-      </td>
-
-      {/* Status */}
-      <td className="px-4 py-3">
-        <ScheduleStatusBadge status={schedule.status} />
-        {schedule.rejection_reason && (
-          <p className="text-xs text-red-500 mt-1 max-w-xs truncate" title={schedule.rejection_reason}>
-            {schedule.rejection_reason}
-          </p>
-        )}
-      </td>
-
-      {/* Actions */}
-      <td className="px-4 py-3 whitespace-nowrap">
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/production/schedule/${schedule.id}`}
-            className="text-xs text-indigo-600 hover:underline font-medium"
-          >
-            View
-          </Link>
-
-          {(schedule.status === "Draft" || schedule.status === "Rejected") && (
-            <button
-              onClick={handleSubmit}
-              className="text-xs text-blue-600 hover:underline font-medium"
-            >
-              Submit
-            </button>
-          )}
-
-          {schedule.status === "Pending Review" && isApprover && (
-            <>
-              <button
-                onClick={handleApprove}
-                className="text-xs text-green-600 hover:underline font-medium"
-              >
-                Approve
-              </button>
-              <button
-                onClick={handleReject}
-                className="text-xs text-red-600 hover:underline font-medium"
-              >
-                Reject
-              </button>
-            </>
-          )}
-        </div>
-      </td>
-    </tr>
+      {/* Reject reason modal — Carbon portals this to document.body, so <tr> wrapper is valid */}
+      <ComposedModal open={rejectOpen} onClose={() => { setRejectOpen(false); setRejectReason(""); }}>
+        <ModalHeader title="Reject Schedule Entry" />
+        <ModalBody>
+          <TextArea
+            id={`reject-reason-${schedule.id}`}
+            labelText="Rejection reason (required)"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            rows={3}
+            placeholder="Describe why this entry is being rejected..."
+            invalid={rejectOpen && !rejectReason.trim()}
+            invalidText="Rejection reason is required"
+          />
+        </ModalBody>
+        <ModalFooter>
+          <Button kind="secondary" onClick={() => { setRejectOpen(false); setRejectReason(""); }}>
+            Cancel
+          </Button>
+          <Button kind="danger" disabled={!rejectReason.trim()} onClick={handleRejectConfirm}>
+            Confirm Reject
+          </Button>
+        </ModalFooter>
+      </ComposedModal>
+    </>
   );
 }

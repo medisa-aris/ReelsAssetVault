@@ -1,6 +1,13 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
+import {
+  ComposedModal,
+  ModalHeader,
+  ModalBody,
+  Search,
+  InlineLoading,
+} from "@carbon/react";
 import { api } from "@/lib/api";
 import { Script } from "@/lib/types";
 
@@ -25,46 +32,55 @@ export default function ScriptPickerModal({ open, onSelect, onClose }: ScriptPic
       .finally(() => setLoading(false));
   }, [open, search]);
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 flex flex-col gap-4 max-h-[80vh]">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Select Script</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">
-            &times;
-          </button>
-        </div>
-
-        <input
-          type="text"
+    <ComposedModal open={open} onClose={onClose} size="sm">
+      <ModalHeader title="Select Script" />
+      <ModalBody hasScrollingContent>
+        <Search
+          id="script-search"
+          labelText="Search scripts"
           placeholder="Search scripts..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          size="md"
+          style={{ marginBottom: "1rem" }}
         />
-
-        <div className="overflow-y-auto flex-1 divide-y divide-gray-100">
-          {loading && <p className="text-sm text-gray-500 py-4 text-center">Loading...</p>}
-          {!loading && scripts.length === 0 && (
-            <p className="text-sm text-gray-500 py-4 text-center">No scripts found</p>
+        <div style={{ minHeight: "16rem" }}>
+          {loading ? (
+            <InlineLoading description="Loading scripts..." />
+          ) : scripts.length === 0 ? (
+            <p style={{ color: "var(--cds-text-placeholder)", fontSize: "0.875rem", padding: "2rem 0", textAlign: "center" }}>
+              No scripts found
+            </p>
+          ) : (
+            scripts.map((script) => (
+              <button
+                key={script.id}
+                onClick={() => { onSelect(script); onClose(); }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  width: "100%",
+                  padding: "0.75rem 0.5rem",
+                  borderBottom: "1px solid var(--cds-border-subtle-01)",
+                  background: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  color: "var(--cds-text-primary)",
+                }}
+              >
+                <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>{script.title}</p>
+                {script.ideation_title && (
+                  <p style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)" }}>
+                    Ideation: {script.ideation_title}
+                  </p>
+                )}
+              </button>
+            ))
           )}
-          {scripts.map((script) => (
-            <button
-              key={script.id}
-              onClick={() => { onSelect(script); onClose(); }}
-              className="w-full flex flex-col items-start px-2 py-3 hover:bg-gray-50 text-left transition-colors"
-            >
-              <p className="text-sm font-medium text-gray-900">{script.title}</p>
-              {script.ideation_title && (
-                <p className="text-xs text-gray-500">Ideation: {script.ideation_title}</p>
-              )}
-            </button>
-          ))}
         </div>
-      </div>
-    </div>
+      </ModalBody>
+    </ComposedModal>
   );
 }
-

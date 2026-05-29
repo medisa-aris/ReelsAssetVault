@@ -1,6 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import {
+  ComposedModal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  TextInput,
+  TextArea,
+  Button,
+  InlineNotification,
+} from "@carbon/react";
 import { api } from "@/lib/api";
 import TagInput from "@/components/TagInput";
 import { formatDuration, formatFileSize, formatResolution } from "@/lib/utils";
@@ -19,17 +29,7 @@ export default function EditMetadataModal({ asset, onClose, onSaved }: EditMetad
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
     if (!title.trim()) { setError("Title is required"); return; }
     setSaving(true);
     setError(null);
@@ -52,88 +52,75 @@ export default function EditMetadataModal({ asset, onClose, onSaved }: EditMetad
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">Edit Metadata</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Close"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Read-only info */}
-        <div className="px-6 py-3 bg-gray-50 border-b border-gray-100 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500">
+    <ComposedModal open onClose={onClose}>
+      <ModalHeader title="Edit Metadata" />
+      <ModalBody>
+        {/* Read-only asset info */}
+        <dl
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "0.25rem 1.5rem",
+            marginBottom: "1.5rem",
+            fontSize: "0.75rem",
+            color: "var(--cds-text-secondary)",
+            background: "var(--cds-layer-01)",
+            padding: "0.75rem",
+            borderRadius: "4px",
+          }}
+        >
           {asset.width && asset.height && (
-            <span>📐 {formatResolution(asset.width, asset.height)}</span>
+            <div><dt style={{ display: "inline" }}>Resolution: </dt><dd style={{ display: "inline" }}>{formatResolution(asset.width, asset.height)}</dd></div>
           )}
-          <span>💾 {formatFileSize(asset.file_size_bytes)}</span>
+          <div><dt style={{ display: "inline" }}>Size: </dt><dd style={{ display: "inline" }}>{formatFileSize(asset.file_size_bytes)}</dd></div>
           {asset.duration_seconds != null && (
-            <span>⏱ {formatDuration(asset.duration_seconds)}</span>
+            <div><dt style={{ display: "inline" }}>Duration: </dt><dd style={{ display: "inline" }}>{formatDuration(asset.duration_seconds)}</dd></div>
           )}
-          <span>📅 {asset.created_at.slice(0, 10)}</span>
+          <div><dt style={{ display: "inline" }}>Uploaded: </dt><dd style={{ display: "inline" }}>{asset.created_at.slice(0, 10)}</dd></div>
+        </dl>
+
+        <TextInput
+          id="edit-title"
+          labelText="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxCount={255}
+          required
+          invalid={!!error && !title.trim()}
+          invalidText="Title is required"
+          style={{ marginBottom: "1rem" }}
+        />
+
+        <TextArea
+          id="edit-description"
+          labelText="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          maxCount={1000}
+          rows={3}
+          style={{ marginBottom: "1rem" }}
+        />
+
+        <div style={{ marginBottom: "0.5rem" }}>
+          <TagInput selectedIds={tagIds} onChange={setTagIds} />
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSave} className="px-6 py-5 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              maxLength={255}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              maxLength={1000}
-              rows={3}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-            <TagInput selectedIds={tagIds} onChange={setTagIds} />
-          </div>
-
-          {error && <p className="text-sm text-red-600">{error}</p>}
-
-          <div className="flex justify-end gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
-              {saving ? "Saving…" : "Save Changes"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        {error && (
+          <InlineNotification
+            kind="error"
+            title={error}
+            style={{ marginTop: "1rem" }}
+          />
+        )}
+      </ModalBody>
+      <ModalFooter>
+        <Button kind="secondary" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button kind="primary" onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "Save Changes"}
+        </Button>
+      </ModalFooter>
+    </ComposedModal>
   );
 }

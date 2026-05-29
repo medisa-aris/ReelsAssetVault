@@ -1,7 +1,29 @@
 "use client";
 
-import { PublishSchedule } from "@/lib/types";
+import {
+  DataTable,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableHeader,
+  TableBody,
+  Pagination,
+  DataTableSkeleton,
+  InlineNotification,
+} from "@carbon/react";
 import ScheduleTableRow from "@/components/ScheduleTableRow";
+import type { PublishSchedule } from "@/lib/types";
+
+const LIMIT = 20;
+
+const headers = [
+  { key: "asset", header: "Asset" },
+  { key: "caption", header: "Caption / Ideation" },
+  { key: "scheduled", header: "Scheduled" },
+  { key: "status", header: "Status" },
+  { key: "actions", header: "Actions" },
+];
 
 interface ScheduleTableProps {
   schedules: PublishSchedule[];
@@ -19,92 +41,86 @@ export default function ScheduleTable({
   schedules,
   total,
   page,
-  limit = 20,
   loading,
   error,
   isApprover,
   onPageChange,
   onRefresh,
 }: ScheduleTableProps) {
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  if (loading) {
+    return <DataTableSkeleton columnCount={5} rowCount={10} headers={headers} />;
+  }
+
+  if (error) {
+    return <InlineNotification kind="error" title="Failed to load schedules" subtitle={error} />;
+  }
+
+  // DataTable needs rows — but since ScheduleTableRow renders custom <tr> content,
+  // we use a plain table approach inside DataTable's container for consistent styling.
+  const rows = schedules.map((s) => ({
+    id: s.id,
+    asset: s.id,
+    caption: s.id,
+    scheduled: s.id,
+    status: s.id,
+    actions: s.id,
+  }));
+
+  const scheduleMap = new Map(schedules.map((s) => [s.id, s]));
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Asset</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Caption / Ideation</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Scheduled</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {loading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">
-                  Loading…
-                </td>
-              </tr>
+    <>
+      <DataTable rows={rows} headers={headers}>
+        {({ rows: tableRows, headers: tableHeaders, getHeaderProps, getTableProps, getTableContainerProps }: any) => (
+          <TableContainer
+            {...getTableContainerProps()}
+            title="Publish Schedule"
+            description={`${total} schedule${total !== 1 ? "s" : ""}`}
+          >
+            {schedules.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "4rem 1rem", color: "var(--cds-text-secondary)" }}>
+                <p style={{ fontSize: "0.875rem" }}>No schedules found. Create your first publish schedule.</p>
+              </div>
+            ) : (
+              <Table {...getTableProps()} size="md">
+                <TableHead>
+                  <TableRow>
+                    {tableHeaders.map((header: { key: string; header: string }) => (
+                      <TableHeader {...getHeaderProps({ header })}>
+                        {header.header}
+                      </TableHeader>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <tbody>
+                  {tableRows.map((row: { id: string }) => {
+                    const schedule = scheduleMap.get(row.id);
+                    if (!schedule) return null;
+                    return (
+                      <ScheduleTableRow
+                        key={schedule.id}
+                        schedule={schedule}
+                        isApprover={isApprover}
+                        onStatusUpdate={onRefresh}
+                      />
+                    );
+                  })}
+                </tbody>
+              </Table>
             )}
-            {!loading && error && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-sm text-red-500">
-                  {error}
-                </td>
-              </tr>
-            )}
-            {!loading && !error && schedules.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-400">
-                  No schedules found
-                </td>
-              </tr>
-            )}
-            {!loading &&
-              !error &&
-              schedules.map((s) => (
-                <ScheduleTableRow
-                  key={s.id}
-                  schedule={s}
-                  isApprover={isApprover}
-                  onStatusUpdate={onRefresh}
-                />
-              ))}
-          </tbody>
-        </table>
-      </div>
+          </TableContainer>
+        )}
+      </DataTable>
 
-      {/* Pagination */}
-      {!loading && total > 0 && (
-        <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-          <span className="text-sm text-gray-500">
-            {total} result{total !== 1 ? "s" : ""}
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onPageChange(page - 1)}
-              disabled={page <= 1}
-              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Prev
-            </button>
-            <span className="text-sm text-gray-700">
-              {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => onPageChange(page + 1)}
-              disabled={page >= totalPages}
-              className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+      {total > 0 && (
+        <Pagination
+          totalItems={total}
+          pageSize={LIMIT}
+          page={page}
+          pageSizes={[LIMIT]}
+          onChange={({ page: p }) => onPageChange(p)}
+        />
       )}
-    </div>
+    </>
   );
 }

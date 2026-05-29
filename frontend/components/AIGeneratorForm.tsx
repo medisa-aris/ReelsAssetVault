@@ -1,6 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Form,
+  TextInput,
+  Select,
+  SelectItem,
+  DatePicker,
+  DatePickerInput,
+  Button,
+  InlineNotification,
+  InlineLoading,
+} from "@carbon/react";
+import { Lightning } from "@carbon/icons-react";
 
 const PLATFORMS = ["Instagram", "TikTok", "YouTube Shorts", "Facebook Reels", "Pinterest"];
 const FREQUENCIES = ["Daily", "3x per week", "2x per week", "Weekly", "Bi-weekly"];
@@ -50,92 +62,98 @@ export default function AIGeneratorForm({ onSubmit, loading }: AIGeneratorFormPr
     }
   };
 
-  const fieldClass = "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <Form onSubmit={handleSubmit}>
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{error}</div>
+        <InlineNotification
+          kind="error"
+          title={error}
+          style={{ marginBottom: "1.5rem" }}
+        />
       )}
 
-      {/* Niche */}
-      <div>
-        <label className={labelClass}>Niche <span className="text-red-500">*</span></label>
-        <input
-          type="text"
-          value={form.niche}
-          onChange={(e) => set("niche", e.target.value)}
-          placeholder="e.g. Fitness & Wellness, Personal Finance, Food & Cooking"
-          className={fieldClass}
-          required
-        />
-      </div>
-
-      {/* Target audience */}
-      <div>
-        <label className={labelClass}>Target Audience</label>
-        <input
-          type="text"
-          value={form.target_audience}
-          onChange={(e) => set("target_audience", e.target.value)}
-          placeholder="e.g. Women 25-35 who want to get healthier"
-          className={fieldClass}
-        />
-      </div>
-
-      {/* Row: platform + frequency */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Platform</label>
-          <select value={form.platform} onChange={(e) => set("platform", e.target.value)} className={fieldClass}>
-            {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className={labelClass}>Posting Frequency</label>
-          <select value={form.posting_frequency} onChange={(e) => set("posting_frequency", e.target.value)} className={fieldClass}>
-            {FREQUENCIES.map((f) => <option key={f} value={f}>{f}</option>)}
-          </select>
-        </div>
-      </div>
-
-      {/* Row: tone + week starting */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Tone / Style</label>
-          <select value={form.tone_style} onChange={(e) => set("tone_style", e.target.value)} className={fieldClass}>
-            {TONES.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className={labelClass}>Week Starting</label>
-          <input type="date" value={form.week_starting} onChange={(e) => set("week_starting", e.target.value)} className={fieldClass} />
-        </div>
-      </div>
-
-      <button
-        type="submit"
+      <TextInput
+        id="gen-niche"
+        labelText="Niche / Topic *"
+        value={form.niche}
+        onChange={(e) => set("niche", e.target.value)}
+        placeholder="e.g. Fitness & Wellness, Personal Finance, Food & Cooking"
+        required
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+        style={{ marginBottom: "1rem" }}
+      />
+
+      <TextInput
+        id="gen-audience"
+        labelText="Target Audience"
+        value={form.target_audience}
+        onChange={(e) => set("target_audience", e.target.value)}
+        placeholder="e.g. Women 25-35 who want to get healthier"
+        disabled={loading}
+        style={{ marginBottom: "1rem" }}
+      />
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
+        <Select
+          id="gen-platform"
+          labelText="Platform"
+          value={form.platform}
+          onChange={(e) => set("platform", e.target.value)}
+          disabled={loading}
+        >
+          {PLATFORMS.map((p) => <SelectItem key={p} value={p} text={p} />)}
+        </Select>
+
+        <Select
+          id="gen-frequency"
+          labelText="Posting Frequency"
+          value={form.posting_frequency}
+          onChange={(e) => set("posting_frequency", e.target.value)}
+          disabled={loading}
+        >
+          {FREQUENCIES.map((f) => <SelectItem key={f} value={f} text={f} />)}
+        </Select>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
+        <Select
+          id="gen-tone"
+          labelText="Tone / Style"
+          value={form.tone_style}
+          onChange={(e) => set("tone_style", e.target.value)}
+          disabled={loading}
+        >
+          {TONES.map((t) => <SelectItem key={t} value={t} text={t} />)}
+        </Select>
+
+        <DatePicker
+          datePickerType="single"
+          value={form.week_starting}
+          onChange={(dates: Date[]) => {
+            if (dates[0]) set("week_starting", dates[0].toISOString().slice(0, 10));
+          }}
+        >
+          <DatePickerInput
+            id="gen-week"
+            labelText="Week Starting"
+            placeholder="YYYY-MM-DD"
+          />
+        </DatePicker>
+      </div>
+
+      <Button
+        type="submit"
+        kind="primary"
+        disabled={loading}
+        renderIcon={loading ? undefined : Lightning}
+        style={{ width: "100%", maxWidth: "100%" }}
       >
         {loading ? (
-          <>
-            <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-            </svg>
-            Generating 7 ideas…
-          </>
+          <InlineLoading description="Generating 7 ideas..." status="active" />
         ) : (
-          <>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Generate 7-Day Content Plan
-          </>
+          "Generate 7-Day Content Plan"
         )}
-      </button>
-    </form>
+      </Button>
+    </Form>
   );
 }

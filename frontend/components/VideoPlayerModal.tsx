@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import { Button, InlineNotification } from "@carbon/react";
+import { Close } from "@carbon/icons-react";
 import { formatDuration, formatFileSize, formatResolution, storageUrl } from "@/lib/utils";
 import type { Asset } from "@/lib/types";
+import { useState } from "react";
 
 // Lazy-load ReactPlayer (SSR disabled — it uses browser APIs)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,9 +21,6 @@ export default function VideoPlayerModal({ asset, onClose }: VideoPlayerModalPro
   const [playerError, setPlayerError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Prefer the explicit file_url from the API; fall back to constructing it
-  // from the asset ID + filename extension (handles cached responses before
-  // the backend restart that added file_url).
   const videoSrc = (() => {
     if (asset.file_url) return storageUrl(asset.file_url);
     const ext = asset.filename.split(".").pop();
@@ -49,36 +49,80 @@ export default function VideoPlayerModal({ asset, onClose }: VideoPlayerModalPro
   meta.push(formatFileSize(asset.file_size_bytes));
 
   return (
-    /* Backdrop */
+    // Backdrop — click outside to close
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9500,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(0,0,0,0.72)",
+        backdropFilter: "blur(4px)",
+        padding: "1rem",
+      }}
       onClick={onClose}
     >
-      {/* Modal container */}
+      {/* Modal container — dark (Carbon g100 theme) */}
       <div
         ref={containerRef}
-        className="relative w-full max-w-4xl bg-gray-950 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        data-carbon-theme="g100"
+        style={{
+          position: "relative",
+          width: "100%",
+          maxWidth: "56rem",
+          background: "#161616", // Carbon Gray 100
+          borderRadius: "8px",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 px-5 py-4 bg-gray-900">
-          <div className="min-w-0">
-            <h2 className="text-white font-semibold text-base truncate">{asset.title}</h2>
-            <p className="text-gray-400 text-xs mt-0.5">{meta.join(" · ")}</p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: "1rem",
+            padding: "1rem 1.25rem",
+            background: "#262626", // Carbon Gray 90
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "1rem",
+                fontWeight: 600,
+                color: "#f4f4f4",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {asset.title}
+            </h2>
+            <p style={{ margin: "0.25rem 0 0", fontSize: "0.75rem", color: "#a8a8a8" }}>
+              {meta.join(" · ")}
+            </p>
           </div>
-          <button
+          <Button
+            kind="ghost"
+            size="sm"
+            renderIcon={Close}
+            iconDescription="Close player"
+            hasIconOnly
             onClick={onClose}
-            className="flex-shrink-0 text-gray-400 hover:text-white transition-colors mt-0.5"
-            aria-label="Close player"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            style={{ flexShrink: 0, color: "#a8a8a8" }}
+          />
         </div>
 
         {/* Player area */}
-        <div className="w-full aspect-video bg-black relative">
+        <div style={{ width: "100%", aspectRatio: "16/9", background: "#000", position: "relative" }}>
           {videoSrc ? (
             <ReactPlayer
               url={videoSrc}
@@ -98,40 +142,60 @@ export default function VideoPlayerModal({ asset, onClose }: VideoPlayerModalPro
               }}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+                color: "#6f6f6f",
+                fontSize: "0.875rem",
+              }}
+            >
               No video file available for this asset.
             </div>
           )}
 
           {/* Player error overlay */}
           {playerError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/80 px-8">
-              <div className="text-center">
-                <svg className="w-12 h-12 text-red-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                    d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                </svg>
-                <p className="text-red-300 text-sm font-medium">{playerError}</p>
-                <button
-                  onClick={() => setPlayerError(null)}
-                  className="mt-3 text-xs text-gray-400 hover:text-white underline"
-                >
-                  Dismiss
-                </button>
-              </div>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "rgba(0,0,0,0.8)",
+                padding: "2rem",
+              }}
+            >
+              <InlineNotification
+                kind="error"
+                title="Playback error"
+                subtitle={playerError}
+                onCloseButtonClick={() => setPlayerError(null)}
+              />
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 bg-gray-900 flex items-center gap-2 text-xs text-gray-500">
-          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-          </svg>
-          <span className="truncate">{asset.filename}</span>
+        <div
+          style={{
+            padding: "0.75rem 1.25rem",
+            background: "#262626",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            fontSize: "0.75rem",
+            color: "#6f6f6f",
+          }}
+        >
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {asset.filename}
+          </span>
           {asset.mime_type && (
-            <span className="ml-auto flex-shrink-0 uppercase tracking-wide">
+            <span style={{ marginLeft: "auto", flexShrink: 0, textTransform: "uppercase", letterSpacing: "0.05em" }}>
               {asset.mime_type.split("/")[1] ?? asset.mime_type}
             </span>
           )}

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/PageLayout";
+import { Button, InlineNotification } from "@carbon/react";
 import SegmentedToggle from "@/components/SegmentedToggle";
 import StatusBadge from "@/components/StatusBadge";
 import LanguageToggle, { type Language } from "@/components/LanguageToggle";
@@ -67,36 +69,35 @@ export default function IdeationDetailPage({ params }: Props) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <>
         <Navigation />
-        <div className="flex items-center justify-center h-64">
-          <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-        </div>
-      </div>
+        <PageLayout maxWidth="md">
+          <div className="flex items-center justify-center h-64">
+            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        </PageLayout>
+      </>
     );
   }
 
   if (error || !ideation) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <>
         <Navigation />
-        <main className="max-w-3xl mx-auto px-6 py-8">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-            <p className="text-red-700">{error ?? "Ideation not found."}</p>
-            <Link href="/script/ideation" className="mt-4 inline-block text-sm text-indigo-600 hover:underline">
-              ← Back to Ideation
-            </Link>
-          </div>
-        </main>
-      </div>
+        <PageLayout maxWidth="md">
+          <InlineNotification kind="error" title={error ?? "Ideation not found."} />
+          <Link href="/script/ideation" className="mt-4 inline-block text-sm text-indigo-600 hover:underline">
+            ← Back to Ideation
+          </Link>
+        </PageLayout>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Navigation />
-
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <PageLayout maxWidth="md">
         {/* Breadcrumb + toggle */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -127,38 +128,26 @@ export default function IdeationDetailPage({ params }: Props) {
             )}
             <div className="ml-auto flex items-center gap-2">
               <LanguageToggle value={scriptLanguage} onChange={setScriptLanguage} />
-            <button
-              onClick={handleGenerateScript}
-              disabled={generating}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
-              {generating ? (
-                <>
-                  <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  Generating…
-                </>
-              ) : (
-                <>
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Generate Script
-                </>
-              )}
-            </button>
+              <Button
+                kind="primary"
+                size="sm"
+                onClick={handleGenerateScript}
+                disabled={generating}
+              >
+                {generating ? "Generating…" : "Generate Script"}
+              </Button>
             </div>
           </div>
         )}
 
         {/* Generate error */}
         {generateError && (
-          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm flex justify-between">
-            <span>{generateError}</span>
-            <button onClick={() => setGenerateError(null)} className="ml-4 font-bold">×</button>
-          </div>
+          <InlineNotification
+            kind="error"
+            title={generateError}
+            onCloseButtonClick={() => setGenerateError(null)}
+            className="mb-4"
+          />
         )}
 
         <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -168,8 +157,8 @@ export default function IdeationDetailPage({ params }: Props) {
             <IdeationViewFields ideation={ideation} />
           )}
         </div>
-      </main>
-    </div>
+      </PageLayout>
+    </>
   );
 }
 

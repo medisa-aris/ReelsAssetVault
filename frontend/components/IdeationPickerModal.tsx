@@ -1,6 +1,13 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
+import {
+  ComposedModal,
+  ModalHeader,
+  ModalBody,
+  Search,
+  InlineLoading,
+} from "@carbon/react";
 import { api } from "@/lib/api";
 import { Ideation } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
@@ -26,49 +33,56 @@ export default function IdeationPickerModal({ open, onSelect, onClose }: Ideatio
       .finally(() => setLoading(false));
   }, [open, search]);
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 flex flex-col gap-4 max-h-[80vh]">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Select Ideation</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">
-            &times;
-          </button>
-        </div>
-
-        <input
-          type="text"
+    <ComposedModal open={open} onClose={onClose} size="sm">
+      <ModalHeader title="Select Ideation" />
+      <ModalBody hasScrollingContent>
+        <Search
+          id="ideation-search"
+          labelText="Search ideations"
           placeholder="Search ideations..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          size="md"
+          style={{ marginBottom: "1rem" }}
         />
-
-        <div className="overflow-y-auto flex-1 divide-y divide-gray-100">
-          {loading && <p className="text-sm text-gray-500 py-4 text-center">Loading...</p>}
-          {!loading && ideations.length === 0 && (
-            <p className="text-sm text-gray-500 py-4 text-center">No ideations found</p>
+        <div style={{ minHeight: "16rem" }}>
+          {loading ? (
+            <InlineLoading description="Loading ideations..." />
+          ) : ideations.length === 0 ? (
+            <p style={{ color: "var(--cds-text-placeholder)", fontSize: "0.875rem", padding: "2rem 0", textAlign: "center" }}>
+              No ideations found
+            </p>
+          ) : (
+            ideations.map((ideation) => (
+              <button
+                key={ideation.id}
+                onClick={() => { onSelect(ideation); onClose(); }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  padding: "0.75rem 0.5rem",
+                  borderBottom: "1px solid var(--cds-border-subtle-01)",
+                  background: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  color: "var(--cds-text-primary)",
+                }}
+              >
+                <div>
+                  <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>{ideation.title}</p>
+                  {ideation.platform && (
+                    <p style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)" }}>{ideation.platform}</p>
+                  )}
+                </div>
+                <StatusBadge status={ideation.status} />
+              </button>
+            ))
           )}
-          {ideations.map((ideation) => (
-            <button
-              key={ideation.id}
-              onClick={() => { onSelect(ideation); onClose(); }}
-              className="w-full flex items-center justify-between px-2 py-3 hover:bg-gray-50 text-left transition-colors"
-            >
-              <div>
-                <p className="text-sm font-medium text-gray-900">{ideation.title}</p>
-                {ideation.platform && (
-                  <p className="text-xs text-gray-500">{ideation.platform}</p>
-                )}
-              </div>
-              <StatusBadge status={ideation.status} />
-            </button>
-          ))}
         </div>
-      </div>
-    </div>
+      </ModalBody>
+    </ComposedModal>
   );
 }
-

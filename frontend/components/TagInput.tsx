@@ -1,12 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MultiSelect } from "@carbon/react";
 import { api } from "@/lib/api";
 import type { Tag } from "@/lib/types";
 
 interface TagInputProps {
   selectedIds: string[];
   onChange: (ids: string[]) => void;
+}
+
+interface Item {
+  id: string;
+  label: string;
 }
 
 export default function TagInput({ selectedIds, onChange }: TagInputProps) {
@@ -21,37 +27,30 @@ export default function TagInput({ selectedIds, onChange }: TagInputProps) {
       .finally(() => setLoading(false));
   }, []);
 
-  const toggle = (id: string) => {
-    if (selectedIds.includes(id)) {
-      onChange(selectedIds.filter((s) => s !== id));
-    } else {
-      onChange([...selectedIds, id]);
-    }
-  };
-
   if (loading) {
-    return <div className="text-sm text-gray-400 italic">Loading tags…</div>;
+    return (
+      <p style={{ fontSize: "0.875rem", color: "var(--cds-text-placeholder)", fontStyle: "italic" }}>
+        Loading tags…
+      </p>
+    );
   }
 
+  const items: Item[] = tags.map((t) => ({ id: t.id, label: t.name }));
+  const initialSelected = items.filter((i) => selectedIds.includes(i.id));
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {tags.map((tag) => {
-        const selected = selectedIds.includes(tag.id);
-        return (
-          <button
-            key={tag.id}
-            type="button"
-            onClick={() => toggle(tag.id)}
-            className={`px-3 py-1 text-xs rounded-full border font-medium transition-colors ${
-              selected
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white text-gray-600 border-gray-300 hover:border-indigo-400 hover:text-indigo-600"
-            }`}
-          >
-            {tag.name}
-          </button>
-        );
-      })}
-    </div>
+    // key forces remount when selectedIds changes from outside (e.g., form reset)
+    <MultiSelect
+      key={selectedIds.join(",")}
+      id="tag-input"
+      label="Select tags"
+      titleText="Tags"
+      items={items}
+      itemToString={(item: Item | null) => item?.label ?? ""}
+      initialSelectedItems={initialSelected}
+      onChange={({ selectedItems }: { selectedItems: Item[] }) =>
+        onChange(selectedItems.map((i) => i.id))
+      }
+    />
   );
 }

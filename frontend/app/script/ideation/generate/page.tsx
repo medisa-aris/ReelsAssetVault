@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/PageLayout";
 import AIGeneratorForm, { type AIGeneratorFormData } from "@/components/AIGeneratorForm";
 import StatusBadge from "@/components/StatusBadge";
 import { api } from "@/lib/api";
@@ -31,22 +32,21 @@ export default function GenerateIdeationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Navigation />
-
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <PageLayout maxWidth="md">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <Link href="/script/ideation" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
             ← Ideation
           </Link>
           <span className="text-gray-300">/</span>
-          <h1 className="text-2xl font-bold text-gray-900">Generate 7-Day Plan</h1>
+          <h1 className="cds--type-productive-heading-04">Generate 7-Day Plan</h1>
         </div>
 
         {/* Info banner */}
         <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6 text-sm text-purple-700">
-          <strong>AI Content Planner</strong> — Fill in your content parameters and we'll generate 7 content ideas
+          <strong>AI Content Planner</strong> — Fill in your content parameters and we&apos;ll generate 7 content ideas
           using the active AI provider. Make sure Admin → AI Config has an active provider before generating.
         </div>
 
@@ -102,7 +102,7 @@ export default function GenerateIdeationPage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+      </PageLayout>
+    </>
   );
 }

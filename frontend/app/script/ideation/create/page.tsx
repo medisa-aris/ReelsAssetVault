@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/PageLayout";
 import IdeationForm, { type IdeationFormData } from "@/components/IdeationForm";
 import { api } from "@/lib/api";
 import type { Ideation } from "@/lib/types";
@@ -23,10 +24,9 @@ export default function CreateIdeationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Navigation />
-
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <PageLayout maxWidth="md">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <Link
@@ -36,13 +36,13 @@ export default function CreateIdeationPage() {
             ← Ideation
           </Link>
           <span className="text-gray-300">/</span>
-          <h1 className="text-2xl font-bold text-gray-900">Create Ideation</h1>
+          <h1 className="cds--type-productive-heading-04">Create Ideation</h1>
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <IdeationForm onSubmit={handleSubmit} submitLabel="Create Ideation" loading={saving} />
         </div>
-      </main>
-    </div>
+      </PageLayout>
+    </>
   );
 }

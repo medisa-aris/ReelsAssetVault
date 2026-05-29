@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import "./globals.css";
+// IBM Carbon Design System — White theme (prebuilt CSS, avoids SCSS/webpack issues in App Router)
+import "@carbon/styles/css/styles.css";
+import { NotificationProvider } from "@/components/NotificationProvider";
 
 export const metadata: Metadata = {
   title: "ReelsAssetVault",
@@ -9,7 +11,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-gray-900">{children}</body>
+      <body>
+        <NotificationProvider>{children}</NotificationProvider>
+      </body>
     </html>
   );
 }

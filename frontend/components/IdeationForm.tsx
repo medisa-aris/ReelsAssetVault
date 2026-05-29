@@ -1,6 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Form,
+  TextInput,
+  TextArea,
+  Select,
+  SelectItem,
+  DatePicker,
+  DatePickerInput,
+  Button,
+  InlineNotification,
+} from "@carbon/react";
 import TagInput from "@/components/TagInput";
 import type { Ideation, IdeationStatus } from "@/lib/types";
 
@@ -52,6 +63,9 @@ function toFormData(ideation?: Partial<Ideation>): IdeationFormData {
   };
 }
 
+const gap = { marginBottom: "1rem" };
+const twoCol = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" };
+
 export default function IdeationForm({ initial, onSubmit, submitLabel = "Save", loading }: IdeationFormProps) {
   const [form, setForm] = useState<IdeationFormData>(toFormData(initial));
   const [error, setError] = useState<string | null>(null);
@@ -71,165 +85,91 @@ export default function IdeationForm({ initial, onSubmit, submitLabel = "Save", 
     }
   };
 
-  const fieldClass = "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <Form onSubmit={handleSubmit}>
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{error}</div>
+        <InlineNotification kind="error" title={error} style={{ marginBottom: "1.5rem" }} />
       )}
 
-      {/* Title */}
-      <div>
-        <label className={labelClass}>Title <span className="text-red-500">*</span></label>
-        <input
-          type="text"
-          value={form.title}
-          onChange={(e) => set("title", e.target.value)}
-          placeholder="e.g. 5 tips for growing on Instagram"
-          className={fieldClass}
-          required
-        />
+      <TextInput
+        id="ideation-title"
+        labelText="Title *"
+        value={form.title}
+        onChange={(e) => set("title", e.target.value)}
+        placeholder="e.g. 5 tips for growing on Instagram"
+        required
+        disabled={loading}
+        style={gap}
+      />
+
+      <div style={twoCol}>
+        <Select id="ideation-platform" labelText="Platform" value={form.platform}
+          onChange={(e) => set("platform", e.target.value)} disabled={loading}>
+          <SelectItem value="" text="Select platform..." />
+          {PLATFORMS.map((p) => <SelectItem key={p} value={p} text={p} />)}
+        </Select>
+        <Select id="ideation-frequency" labelText="Posting Frequency" value={form.posting_frequency}
+          onChange={(e) => set("posting_frequency", e.target.value)} disabled={loading}>
+          <SelectItem value="" text="Select frequency..." />
+          {FREQUENCIES.map((f) => <SelectItem key={f} value={f} text={f} />)}
+        </Select>
       </div>
 
-      {/* Row: platform + frequency */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Platform</label>
-          <select value={form.platform} onChange={(e) => set("platform", e.target.value)} className={fieldClass}>
-            <option value="">Select platform…</option>
-            {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className={labelClass}>Posting Frequency</label>
-          <select value={form.posting_frequency} onChange={(e) => set("posting_frequency", e.target.value)} className={fieldClass}>
-            <option value="">Select frequency…</option>
-            {FREQUENCIES.map((f) => <option key={f} value={f}>{f}</option>)}
-          </select>
-        </div>
+      <div style={twoCol}>
+        <TextInput id="ideation-niche" labelText="Niche" value={form.niche}
+          onChange={(e) => set("niche", e.target.value)}
+          placeholder="e.g. Fitness, Travel, Food" disabled={loading} />
+        <Select id="ideation-tone" labelText="Tone / Style" value={form.tone_style}
+          onChange={(e) => set("tone_style", e.target.value)} disabled={loading}>
+          <SelectItem value="" text="Select tone..." />
+          {TONES.map((t) => <SelectItem key={t} value={t} text={t} />)}
+        </Select>
       </div>
 
-      {/* Row: niche + tone */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Niche</label>
-          <input
-            type="text"
-            value={form.niche}
-            onChange={(e) => set("niche", e.target.value)}
-            placeholder="e.g. Fitness, Travel, Food"
-            className={fieldClass}
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Tone / Style</label>
-          <select value={form.tone_style} onChange={(e) => set("tone_style", e.target.value)} className={fieldClass}>
-            <option value="">Select tone…</option>
-            {TONES.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
-        </div>
+      <TextInput id="ideation-audience" labelText="Target Audience" value={form.target_audience}
+        onChange={(e) => set("target_audience", e.target.value)}
+        placeholder="e.g. Women 25-35, fitness enthusiasts" disabled={loading} style={gap} />
+
+      <TextArea id="ideation-hook" labelText="Hook" value={form.hook}
+        onChange={(e) => set("hook", e.target.value)}
+        placeholder="Opening hook to grab attention..." rows={2} disabled={loading} style={gap} />
+
+      <TextArea id="ideation-summary" labelText="Content Summary" value={form.content_summary}
+        onChange={(e) => set("content_summary", e.target.value)}
+        placeholder="What the video covers..." rows={3} disabled={loading} style={gap} />
+
+      <TextInput id="ideation-cta" labelText="Call To Action" value={form.cta}
+        onChange={(e) => set("cta", e.target.value)}
+        placeholder="e.g. Save this for later, Follow for more!" disabled={loading} style={gap} />
+
+      <div style={twoCol}>
+        <DatePicker datePickerType="single" value={form.upload_date}
+          onChange={(dates: Date[]) => { if (dates[0]) set("upload_date", dates[0].toISOString().slice(0, 10)); }}>
+          <DatePickerInput id="ideation-upload-date" labelText="Upload Date" placeholder="YYYY-MM-DD" />
+        </DatePicker>
+        {/* Carbon TimePicker is for AM/PM; use TextInput type="time" for 24h */}
+        <TextInput id="ideation-upload-time" labelText="Upload Time" type="time"
+          value={form.upload_time} onChange={(e) => set("upload_time", e.target.value)} />
       </div>
 
-      {/* Target audience */}
-      <div>
-        <label className={labelClass}>Target Audience</label>
-        <input
-          type="text"
-          value={form.target_audience}
-          onChange={(e) => set("target_audience", e.target.value)}
-          placeholder="e.g. Women 25-35, fitness enthusiasts"
-          className={fieldClass}
-        />
+      <Select id="ideation-status" labelText="Status" value={form.status}
+        onChange={(e) => set("status", e.target.value as IdeationStatus)} disabled={loading} style={gap}>
+        {STATUSES.map((s) => <SelectItem key={s} value={s} text={s} />)}
+      </Select>
+
+      <div style={gap}>
+        <TagInput selectedIds={form.tag_ids} onChange={(ids) => set("tag_ids", ids)} />
       </div>
 
-      {/* Hook */}
-      <div>
-        <label className={labelClass}>Hook</label>
-        <textarea
-          value={form.hook}
-          onChange={(e) => set("hook", e.target.value)}
-          rows={2}
-          placeholder="Opening hook to grab attention…"
-          className={fieldClass}
-        />
-      </div>
+      <TextArea id="ideation-notes" labelText="Notes" value={form.notes}
+        onChange={(e) => set("notes", e.target.value)}
+        placeholder="Optional notes..." rows={2} disabled={loading} style={gap} />
 
-      {/* Content summary */}
-      <div>
-        <label className={labelClass}>Content Summary</label>
-        <textarea
-          value={form.content_summary}
-          onChange={(e) => set("content_summary", e.target.value)}
-          rows={3}
-          placeholder="What the video covers…"
-          className={fieldClass}
-        />
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
+        <Button type="submit" kind="primary" disabled={loading}>
+          {loading ? "Saving..." : submitLabel}
+        </Button>
       </div>
-
-      {/* CTA */}
-      <div>
-        <label className={labelClass}>Call To Action</label>
-        <input
-          type="text"
-          value={form.cta}
-          onChange={(e) => set("cta", e.target.value)}
-          placeholder="e.g. Save this for later, Follow for more!"
-          className={fieldClass}
-        />
-      </div>
-
-      {/* Row: upload date + time */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Upload Date</label>
-          <input type="date" value={form.upload_date} onChange={(e) => set("upload_date", e.target.value)} className={fieldClass} />
-        </div>
-        <div>
-          <label className={labelClass}>Upload Time</label>
-          <input type="time" value={form.upload_time} onChange={(e) => set("upload_time", e.target.value)} className={fieldClass} />
-        </div>
-      </div>
-
-      {/* Status */}
-      <div>
-        <label className={labelClass}>Status</label>
-        <select value={form.status} onChange={(e) => set("status", e.target.value as IdeationStatus)} className={fieldClass}>
-          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-      </div>
-
-      {/* Tags */}
-      <div>
-        <label className={labelClass}>Tags</label>
-        <TagInput
-          selectedIds={form.tag_ids}
-          onChange={(ids: string[]) => set("tag_ids", ids)}
-        />
-      </div>
-
-      {/* Notes */}
-      <div>
-        <label className={labelClass}>Notes</label>
-        <textarea
-          value={form.notes}
-          onChange={(e) => set("notes", e.target.value)}
-          rows={2}
-          placeholder="Optional notes…"
-          className={fieldClass}
-        />
-      </div>
-
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-        >
-          {loading ? "Saving…" : submitLabel}
-        </button>
-      </div>
-    </form>
+    </Form>
   );
 }

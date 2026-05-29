@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/PageLayout";
+import { Button, InlineNotification } from "@carbon/react";
 import SegmentedToggle from "@/components/SegmentedToggle";
 import ScriptSections from "@/components/ScriptSections";
 import { api } from "@/lib/api";
@@ -104,36 +106,35 @@ export default function ScriptDetailPage({ params }: Props) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <>
         <Navigation />
-        <div className="flex items-center justify-center h-64">
-          <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-        </div>
-      </div>
+        <PageLayout maxWidth="md">
+          <div className="flex items-center justify-center h-64">
+            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        </PageLayout>
+      </>
     );
   }
 
   if (error || !displayScript) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <>
         <Navigation />
-        <main className="max-w-3xl mx-auto px-6 py-8">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-            <p className="text-red-700">{error ?? "Script not found."}</p>
-            <Link href="/script/scripts" className="mt-4 inline-block text-sm text-indigo-600 hover:underline">
-              ← Back to Scripts
-            </Link>
-          </div>
-        </main>
-      </div>
+        <PageLayout maxWidth="md">
+          <InlineNotification kind="error" title={error ?? "Script not found."} />
+          <Link href="/script/scripts" className="mt-4 inline-block text-sm text-indigo-600 hover:underline">
+            ← Back to Scripts
+          </Link>
+        </PageLayout>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Navigation />
-
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <PageLayout maxWidth="md">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -163,35 +164,37 @@ export default function ScriptDetailPage({ params }: Props) {
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xs text-gray-500 font-medium">Export:</span>
           {(["txt", "md", "pdf"] as ExportFormat[]).map((fmt) => (
-            <button
+            <Button
               key={fmt}
+              kind="ghost"
+              size="sm"
               onClick={() => handleExport(fmt)}
               disabled={exporting !== null}
-              className="text-xs px-2.5 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors uppercase"
             >
-              {exporting === fmt ? "…" : fmt}
-            </button>
+              {exporting === fmt ? "…" : fmt.toUpperCase()}
+            </Button>
           ))}
-          <button
-            onClick={handleCopy}
-            className="ml-2 text-xs px-2.5 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
-          >
+          <Button kind="ghost" size="sm" onClick={handleCopy}>
             {copyDone ? "✓ Copied!" : "Copy"}
-          </button>
+          </Button>
         </div>
 
         {/* Error banners */}
         {exportError && (
-          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-2 text-sm flex justify-between">
-            <span>{exportError}</span>
-            <button onClick={() => setExportError(null)} className="ml-4 font-bold">×</button>
-          </div>
+          <InlineNotification
+            kind="error"
+            title={exportError}
+            onCloseButtonClick={() => setExportError(null)}
+            className="mb-4"
+          />
         )}
         {saveError && (
-          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-2 text-sm flex justify-between">
-            <span>{saveError}</span>
-            <button onClick={() => setSaveError(null)} className="ml-4 font-bold">×</button>
-          </div>
+          <InlineNotification
+            kind="error"
+            title={saveError}
+            onCloseButtonClick={() => setSaveError(null)}
+            className="mb-4"
+          />
         )}
 
         {/* Script content */}
@@ -200,19 +203,16 @@ export default function ScriptDetailPage({ params }: Props) {
             <>
               <ScriptSections mode="edit" script={displayScript} onChange={handleChange} />
               <div className="mt-6 flex justify-end gap-3">
-                <button
+                <Button
+                  kind="ghost"
+                  size="sm"
                   onClick={() => { setEdits({}); setMode("view"); setSaveError(null); }}
-                  className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-                >
+                </Button>
+                <Button kind="primary" size="sm" onClick={handleSave} disabled={saving}>
                   {saving ? "Saving…" : "Save Changes"}
-                </button>
+                </Button>
               </div>
             </>
           ) : (
@@ -225,7 +225,7 @@ export default function ScriptDetailPage({ params }: Props) {
           <p>Created: {new Date(displayScript.created_at).toLocaleString()}</p>
           {displayScript.updated_by_name && <p>Last edited by: {displayScript.updated_by_name}</p>}
         </div>
-      </main>
-    </div>
+      </PageLayout>
+    </>
   );
 }

@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/PageLayout";
+import { useNotification } from "@/components/NotificationProvider";
+import { Button, InlineNotification, Tile } from "@carbon/react";
 import { api } from "@/lib/api";
 import type { AiConfig } from "@/lib/types";
 
@@ -26,6 +29,7 @@ interface ConfigCardProps {
 }
 
 function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
+  const { notify } = useNotification();
   const [editing, setEditing] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState(config.model ?? "");
@@ -46,7 +50,7 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
       setEditing(false);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      alert(msg || "Failed to save config.");
+      notify("error", "Save Failed", msg || "Failed to save config.");
     } finally {
       setSaving(false);
     }
@@ -58,7 +62,7 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
       await api.patch(`/admin/ai-config/${config.id}/activate`);
       onActivate(config.id);
     } catch {
-      alert("Failed to activate provider.");
+      notify("error", "Activation Failed", "Failed to activate provider.");
     } finally {
       setActivating(false);
     }
@@ -84,7 +88,7 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
   const showBaseUrl = config.provider === "ollama" || config.provider === "kimi";
 
   return (
-    <div className={`bg-white rounded-xl border-2 p-5 transition-colors ${config.is_active ? "border-indigo-400" : "border-gray-200"}`}>
+    <Tile style={{ borderLeft: config.is_active ? "3px solid var(--cds-interactive)" : undefined }}>
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div>
@@ -102,28 +106,22 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
 
         <div className="flex items-center gap-2">
           {!config.is_active && (
-            <button
-              onClick={handleActivate}
-              disabled={activating}
-              className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors font-medium"
-            >
+            <Button kind="primary" size="sm" onClick={handleActivate} disabled={activating}>
               {activating ? "Activating…" : "Set Active"}
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            kind="ghost"
+            size="sm"
             onClick={handleTest}
             disabled={testing || !config.is_active}
             title={!config.is_active ? "Activate this provider first to test" : ""}
-            className="text-xs px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
           >
             {testing ? "Testing…" : "Test"}
-          </button>
-          <button
-            onClick={() => setEditing((v) => !v)}
-            className="text-xs px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-          >
+          </Button>
+          <Button kind="ghost" size="sm" onClick={() => setEditing((v) => !v)}>
             {editing ? "Cancel" : "Edit"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -185,13 +183,9 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
             </div>
           )}
           <div className="flex justify-end">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
+            <Button kind="primary" size="sm" onClick={handleSave} disabled={saving}>
               {saving ? "Saving…" : "Save"}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -202,7 +196,7 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
           {testResult.success ? "✓ " : "✗ "}{testResult.message}
         </div>
       )}
-    </div>
+    </Tile>
   );
 }
 
@@ -233,12 +227,11 @@ export default function AiConfigPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Navigation />
-
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <PageLayout maxWidth="md">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">AI Configuration</h1>
+          <h1 className="cds--type-productive-heading-04">AI Configuration</h1>
           <p className="text-sm text-gray-500 mt-1">
             Configure which AI provider is used for content generation. Only one provider can be active at a time.
           </p>
@@ -249,9 +242,7 @@ export default function AiConfigPage() {
             <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-            <p className="text-red-700 text-sm">{error}</p>
-          </div>
+          <InlineNotification kind="error" title={error} />
         ) : (
           <div className="space-y-4">
             {configs.map((config) => (
@@ -264,7 +255,7 @@ export default function AiConfigPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+      </PageLayout>
+    </>
   );
 }

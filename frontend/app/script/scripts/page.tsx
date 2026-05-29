@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/PageLayout";
+import { Button, InlineNotification } from "@carbon/react";
 import { useScripts } from "@/hooks/useScripts";
 import { formatDate } from "@/lib/utils";
 
@@ -15,14 +17,13 @@ export default function ScriptListPage() {
   const totalPages = Math.ceil(total / 20);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Navigation />
-
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <PageLayout maxWidth="max">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Scripts</h1>
+            <h1 className="cds--type-productive-heading-04">Scripts</h1>
             {!loading && !error && (
               <p className="text-sm text-gray-500 mt-0.5">{total} script{total !== 1 ? "s" : ""}</p>
             )}
@@ -47,9 +48,7 @@ export default function ScriptListPage() {
             <p className="mt-3 text-sm text-gray-500">Loading scripts…</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-            <p className="text-red-700 text-sm">{error}</p>
-          </div>
+          <InlineNotification kind="error" title={error} />
         ) : scripts.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
             <p className="text-gray-400 text-sm">No scripts yet. Generate one from an ideation!</p>
@@ -98,18 +97,12 @@ export default function ScriptListPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <Link
-                            href={`/script/scripts/${script.id}`}
-                            className="text-xs px-2.5 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
-                          >
-                            View
-                          </Link>
-                          <Link
-                            href={`/script/scripts/${script.id}?mode=edit`}
-                            className="text-xs px-2.5 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
-                          >
-                            Edit
-                          </Link>
+                          <Button kind="ghost" size="sm" onClick={() => {}}>
+                            <Link href={`/script/scripts/${script.id}`}>View</Link>
+                          </Button>
+                          <Button kind="ghost" size="sm" onClick={() => {}}>
+                            <Link href={`/script/scripts/${script.id}?mode=edit`}>Edit</Link>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -123,26 +116,28 @@ export default function ScriptListPage() {
               <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between text-sm text-gray-500">
                 <span>Page {page} of {totalPages} · {total} scripts</span>
                 <div className="flex gap-2">
-                  <button
+                  <Button
+                    kind="ghost"
+                    size="sm"
                     onClick={() => setPage(page - 1)}
                     disabled={page <= 1}
-                    className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
                   >
                     Previous
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    kind="ghost"
+                    size="sm"
                     onClick={() => setPage(page + 1)}
                     disabled={page >= totalPages}
-                    className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
           </div>
         )}
-      </main>
-    </div>
+      </PageLayout>
+    </>
   );
 }

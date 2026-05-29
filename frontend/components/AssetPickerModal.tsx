@@ -1,6 +1,13 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
+import {
+  ComposedModal,
+  ModalHeader,
+  ModalBody,
+  Search,
+  InlineLoading,
+} from "@carbon/react";
 import { api } from "@/lib/api";
 import { Asset } from "@/lib/types";
 import { storageUrl } from "@/lib/utils";
@@ -26,57 +33,62 @@ export default function AssetPickerModal({ open, onSelect, onClose }: AssetPicke
       .finally(() => setLoading(false));
   }, [open, search]);
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 flex flex-col gap-4 max-h-[80vh]">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Select Asset</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">
-            &times;
-          </button>
-        </div>
-
-        <input
-          type="text"
+    <ComposedModal open={open} onClose={onClose} size="sm">
+      <ModalHeader title="Select Asset" />
+      <ModalBody hasScrollingContent>
+        <Search
+          id="asset-search"
+          labelText="Search assets"
           placeholder="Search assets..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          size="md"
+          style={{ marginBottom: "1rem" }}
         />
-
-        <div className="overflow-y-auto flex-1 divide-y divide-gray-100">
-          {loading && <p className="text-sm text-gray-500 py-4 text-center">Loading...</p>}
-          {!loading && assets.length === 0 && (
-            <p className="text-sm text-gray-500 py-4 text-center">No assets found</p>
-          )}
-          {assets.map((asset) => (
-            <button
-              key={asset.id}
-              onClick={() => { onSelect(asset); onClose(); }}
-              className="w-full flex items-center gap-3 px-2 py-3 hover:bg-gray-50 text-left transition-colors"
-            >
-              {asset.thumbnail_url ? (
-                <img
-                  src={storageUrl(asset.thumbnail_url) ?? ""}
-                  alt={asset.title}
-                  className="w-12 h-12 object-cover rounded"
-                />
-              ) : (
-                <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
-                  No img
+        <div style={{ minHeight: "16rem" }}>
+          {loading ? (
+            <InlineLoading description="Loading assets..." />
+          ) : assets.length === 0 ? (
+            <p style={{ color: "var(--cds-text-placeholder)", fontSize: "0.875rem", padding: "2rem 0", textAlign: "center" }}>
+              No assets found
+            </p>
+          ) : (
+            assets.map((asset) => (
+              <button
+                key={asset.id}
+                onClick={() => { onSelect(asset); onClose(); }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  width: "100%",
+                  padding: "0.75rem 0.5rem",
+                  borderBottom: "1px solid var(--cds-border-subtle-01)",
+                  background: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  color: "var(--cds-text-primary)",
+                }}
+              >
+                {asset.thumbnail_url ? (
+                  <img
+                    src={storageUrl(asset.thumbnail_url) ?? ""}
+                    alt={asset.title}
+                    style={{ width: "3rem", height: "3rem", objectFit: "cover", borderRadius: "4px", flexShrink: 0 }}
+                  />
+                ) : (
+                  <div style={{ width: "3rem", height: "3rem", background: "var(--cds-layer-02)", borderRadius: "4px", flexShrink: 0 }} />
+                )}
+                <div>
+                  <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>{asset.title}</p>
+                  <p style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)" }}>{asset.filename}</p>
                 </div>
-              )}
-              <div>
-                <p className="text-sm font-medium text-gray-900">{asset.title}</p>
-                <p className="text-xs text-gray-500">{asset.filename}</p>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))
+          )}
         </div>
-      </div>
-    </div>
+      </ModalBody>
+    </ComposedModal>
   );
 }
-

@@ -3,8 +3,9 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/PageLayout";
 import { useAuth } from "@/hooks/useAuth";
-import Link from "next/link";
+import { Button } from "@carbon/react";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -27,30 +28,26 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Navigation />
-      <main className="max-w-4xl mx-auto px-6 py-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-900">
-          Welcome, {user.full_name}!
-        </h2>
-        <p className="mt-3 text-gray-500 text-base">
-          ReelsAssetVault is your central library for short-form video assets.
-        </p>
-        <div className="mt-8 flex justify-center gap-4">
-          <Link
-            href="/video"
-            className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
-          >
-            Browse Library
-          </Link>
-          <Link
-            href="/video/upload"
-            className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors"
-          >
-            Upload Video
-          </Link>
+      <PageLayout maxWidth="max">
+        <div className="py-8 text-center">
+          <h2 className="cds--type-productive-heading-04">
+            Welcome, {user.full_name}!
+          </h2>
+          <p className="mt-3 text-gray-500 text-base">
+            ReelsAssetVault is your central library for short-form video assets.
+          </p>
+          <div className="mt-8 flex justify-center gap-4">
+            <Button kind="primary" onClick={() => router.push("/video")}>
+              Browse Library
+            </Button>
+            <Button kind="secondary" onClick={() => router.push("/video/upload")}>
+              Upload Video
+            </Button>
+          </div>
         </div>
-      </main>
-    </div>
+      </PageLayout>
+    </>
   );
 }

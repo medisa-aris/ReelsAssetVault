@@ -1,14 +1,24 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import Link from "next/link";
+import { Search, Dropdown, Button } from "@carbon/react";
+import { Lightning, Add } from "@carbon/icons-react";
+import { useRouter } from "next/navigation";
 import Navigation from "@/components/Navigation";
 import IdeationTable from "@/components/IdeationTable";
+import { PageLayout } from "@/components/PageLayout";
 import { useIdeations } from "@/hooks/useIdeations";
 
 const STATUSES = ["Draft", "Approved", "Script Generated", "Published"];
+const SORT_OPTIONS = [
+  { id: "created_at-desc", text: "Newest First" },
+  { id: "created_at-asc", text: "Oldest First" },
+  { id: "upload_date-asc", text: "Upload Date ↑" },
+  { id: "upload_date-desc", text: "Upload Date ↓" },
+];
 
 export default function IdeationListPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortBy, setSortBy] = useState<"created_at" | "upload_date">("created_at");
@@ -29,75 +39,62 @@ export default function IdeationListPage() {
     [sortBy]
   );
 
-  const handleDeleted = useCallback((id: string) => {
-    refetch();
-  }, [refetch]);
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Navigation />
-
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <PageLayout maxWidth="max">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Ideation</h1>
+            <h1 className="cds--type-productive-heading-04">Ideation</h1>
             {!loading && !error && (
-              <p className="text-sm text-gray-500 mt-0.5">{total} idea{total !== 1 ? "s" : ""}</p>
+              <p style={{ fontSize: "0.875rem", color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
+                {total} idea{total !== 1 ? "s" : ""}
+              </p>
             )}
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/script/ideation/generate"
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+          <div style={{ display: "flex", gap: "0.75rem" }}>
+            <Button kind="secondary" renderIcon={Lightning} onClick={() => router.push("/script/ideation/generate")}>
               Generate Plan
-            </Link>
-            <Link
-              href="/script/ideation/create"
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
+            </Button>
+            <Button kind="primary" renderIcon={Add} onClick={() => router.push("/script/ideation/create")}>
               Create Ideation
-            </Link>
+            </Button>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-3 mb-5">
-          <input
-            type="search"
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
+          <Search
+            id="ideation-search"
+            labelText="Search ideations"
+            placeholder="Search ideations..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search ideations…"
-            className="flex-1 min-w-[200px] max-w-sm rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            size="md"
+            style={{ flex: 1, minWidth: "12rem", maxWidth: "20rem" }}
           />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="">All Statuses</option>
-            {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <select
-            value={`${sortBy}-${sortDir}`}
-            onChange={(e) => {
-              const [k, d] = e.target.value.split("-") as ["created_at" | "upload_date", "asc" | "desc"];
+          <Dropdown
+            id="status-filter"
+            titleText=""
+            label="All Statuses"
+            items={["", ...STATUSES]}
+            itemToString={(item: string) => item || "All Statuses"}
+            selectedItem={statusFilter}
+            onChange={({ selectedItem }: { selectedItem: string }) => setStatusFilter(selectedItem || "")}
+          />
+          <Dropdown
+            id="sort-filter"
+            titleText=""
+            label="Sort"
+            items={SORT_OPTIONS}
+            itemToString={(item: { id: string; text: string } | null) => item?.text ?? ""}
+            selectedItem={SORT_OPTIONS.find((o) => o.id === `${sortBy}-${sortDir}`) ?? SORT_OPTIONS[0]}
+            onChange={({ selectedItem }: { selectedItem: { id: string; text: string } }) => {
+              const [k, d] = selectedItem.id.split("-") as ["created_at" | "upload_date", "asc" | "desc"];
               setSortBy(k); setSortDir(d);
             }}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="created_at-desc">Newest First</option>
-            <option value="created_at-asc">Oldest First</option>
-            <option value="upload_date-asc">Upload Date ↑</option>
-            <option value="upload_date-desc">Upload Date ↓</option>
-          </select>
+          />
         </div>
 
         <IdeationTable
@@ -110,10 +107,10 @@ export default function IdeationListPage() {
           sortDir={sortDir}
           onSortChange={handleSortChange}
           onPageChange={(p) => setPage(p)}
-          onDeleted={handleDeleted}
+          onDeleted={() => refetch()}
           refetch={refetch}
         />
-      </main>
-    </div>
+      </PageLayout>
+    </>
   );
 }

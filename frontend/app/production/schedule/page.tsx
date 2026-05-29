@@ -1,23 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Search, Dropdown, Button } from "@carbon/react";
+import { Add } from "@carbon/icons-react";
+import { useRouter } from "next/navigation";
 import Navigation from "@/components/Navigation";
+import { PageLayout } from "@/components/PageLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchedules } from "@/hooks/useSchedules";
 import ScheduleTable from "@/components/ScheduleTable";
 
 const STATUS_OPTIONS = [
-  "",
-  "Draft",
-  "Pending Review",
-  "Approved",
-  "Scheduled",
-  "Published",
-  "Rejected",
+  { id: "", text: "All statuses" },
+  { id: "Draft", text: "Draft" },
+  { id: "Pending Review", text: "Pending Review" },
+  { id: "Approved", text: "Approved" },
+  { id: "Scheduled", text: "Scheduled" },
+  { id: "Published", text: "Published" },
+  { id: "Rejected", text: "Rejected" },
 ];
 
 export default function PublishSchedulePage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -34,57 +38,56 @@ export default function PublishSchedulePage() {
   return (
     <>
       <Navigation />
-      <div className="max-w-6xl mx-auto px-6 py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Publish Schedule</h1>
-          <p className="text-sm text-gray-500 mt-1">Plan and track your content publishing pipeline</p>
+      <PageLayout maxWidth="max">
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
+          <div>
+            <h1 className="cds--type-productive-heading-04">Publish Schedule</h1>
+            <p style={{ fontSize: "0.875rem", color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
+              Plan and track your content publishing pipeline
+            </p>
+          </div>
+          <Button kind="primary" renderIcon={Add} onClick={() => router.push("/production/schedule/create")}>
+            New Schedule
+          </Button>
         </div>
-        <Link
-          href="/production/schedule/create"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          New Schedule
-        </Link>
-      </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-3 mb-6">
-        <input
-          type="text"
-          placeholder="Search by caption…"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        {/* Filters */}
+        <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+          <Search
+            id="schedule-search"
+            labelText="Search schedules"
+            placeholder="Search by caption..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            size="md"
+            style={{ flex: 1, minWidth: "12rem", maxWidth: "20rem" }}
+          />
+          <Dropdown
+            id="status-filter"
+            titleText=""
+            label="All statuses"
+            items={STATUS_OPTIONS}
+            itemToString={(item: { id: string; text: string } | null) => item?.text ?? ""}
+            selectedItem={STATUS_OPTIONS.find((o) => o.id === status) ?? STATUS_OPTIONS[0]}
+            onChange={({ selectedItem }: { selectedItem: { id: string; text: string } }) => {
+              setStatus(selectedItem.id);
+              setPage(1);
+            }}
+          />
+        </div>
+
+        <ScheduleTable
+          schedules={schedules}
+          total={total}
+          page={page}
+          loading={loading}
+          error={error}
+          isApprover={isApprover}
+          onPageChange={setPage}
+          onRefresh={refetch}
         />
-        <select
-          value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
-          {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s || "All statuses"}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <ScheduleTable
-        schedules={schedules}
-        total={total}
-        page={page}
-        loading={loading}
-        error={error}
-        isApprover={isApprover}
-        onPageChange={setPage}
-        onRefresh={refetch}
-      />
-    </div>
+      </PageLayout>
     </>
   );
 }

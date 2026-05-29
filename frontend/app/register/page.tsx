@@ -1,16 +1,30 @@
+import { Tile } from "@carbon/react";
 import RegisterForm from "@/components/RegisterForm";
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">ReelsAssetVault</h1>
-          <p className="mt-2 text-gray-500">Create your account</p>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--cds-background)",
+        padding: "3rem 1rem",
+      }}
+    >
+      <div style={{ width: "100%", maxWidth: "24rem" }}>
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: 600, color: "var(--cds-text-primary)", margin: 0 }}>
+            ReelsAssetVault
+          </h1>
+          <p style={{ marginTop: "0.5rem", fontSize: "0.875rem", color: "var(--cds-text-secondary)" }}>
+            Create your account
+          </p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <Tile style={{ padding: "1.5rem" }}>
           <RegisterForm />
-        </div>
+        </Tile>
       </div>
     </div>
   );
