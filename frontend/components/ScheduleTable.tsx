@@ -72,11 +72,7 @@ export default function ScheduleTable({
     <>
       <DataTable rows={rows} headers={headers}>
         {({ rows: tableRows, headers: tableHeaders, getHeaderProps, getTableProps, getTableContainerProps }: any) => (
-          <TableContainer
-            {...getTableContainerProps()}
-            title="Publish Schedule"
-            description={`${total} schedule${total !== 1 ? "s" : ""}`}
-          >
+          <TableContainer {...getTableContainerProps()}>
             {schedules.length === 0 ? (
               <div style={{ textAlign: "center", padding: "4rem 1rem", color: "var(--cds-text-secondary)" }}>
                 <p style={{ fontSize: "0.875rem" }}>No schedules found. Create your first publish schedule.</p>

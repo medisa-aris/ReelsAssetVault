@@ -14,9 +14,10 @@ export default function SegmentedToggle({ value, onChange }: SegmentedToggleProp
       onChange={({ index }: { index?: number }) =>
         onChange((index ?? 0) === 0 ? "view" : "edit")
       }
+      style={{ width: "200px" }}
     >
-      <Switch name="view" text="View" />
-      <Switch name="edit" text="Edit" />
+      <Switch name="view" text="View" style={{ width: "100px", maxWidth: "100px" }} />
+      <Switch name="edit" text="Edit" style={{ width: "100px", maxWidth: "100px" }} />
     </ContentSwitcher>
   );
 }

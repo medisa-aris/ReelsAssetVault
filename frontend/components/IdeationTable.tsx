@@ -15,15 +15,10 @@ import {
   TableSelectRow,
   TableBatchActions,
   TableBatchAction,
-  TableToolbar,
-  TableToolbarContent,
-  TableToolbarSearch,
   Pagination,
   DataTableSkeleton,
   InlineNotification,
   Button,
-  OverflowMenu,
-  OverflowMenuItem,
 } from "@carbon/react";
 import { TrashCan, Renew } from "@carbon/icons-react";
 import Link from "next/link";
@@ -150,11 +145,7 @@ export default function IdeationTable({
           getBatchActionProps,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }: any) => (
-          <TableContainer
-            {...getTableContainerProps()}
-            title="Ideations"
-            description={`${total} ideation${total !== 1 ? "s" : ""}`}
-          >
+          <TableContainer {...getTableContainerProps()}>
             <TableBatchActions {...getBatchActionProps()}>
               <TableBatchAction
                 renderIcon={TrashCan}
@@ -172,12 +163,6 @@ export default function IdeationTable({
                 </TableBatchAction>
               ))}
             </TableBatchActions>
-
-            <TableToolbar>
-              <TableToolbarContent>
-                <TableToolbarSearch placeholder="Search ideations..." />
-              </TableToolbarContent>
-            </TableToolbar>
 
             {ideations.length === 0 ? (
               <div style={{ textAlign: "center", padding: "4rem 1rem", color: "var(--cds-text-secondary)" }}>

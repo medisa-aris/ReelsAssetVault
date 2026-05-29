@@ -1,0 +1,77 @@
+/* ──────────────────────────────────────────────────────────────
+   Carbon Design System — supplemental fixes for ReelsAssetVault
+   ────────────────────────────────────────────────────────────── */
+
+/* 1. Always show the header navigation (desktop-first internal tool).
+      Carbon hides it below 66rem by default for responsive/mobile. */
+.cds--header__nav {
+  display: block !important;
+}
+
+/* 3. Dark header (g100 theme) — ensure nav link text is light on dark background. */
+[data-carbon-theme="g100"].cds--header,
+[data-carbon-theme="g100"] .cds--header__name,
+[data-carbon-theme="g100"] .cds--header__name:hover,
+[data-carbon-theme="g100"] .cds--header__menu-title{
+  background-color: #161616;
+  color: #f4f4f4;
+}
+
+[data-carbon-theme="g100"] .cds--header__menu-item {
+  background-color: #161616
+}
+
+[data-carbon-theme="g100"].cds--header {
+  background-color: #161616;
+  border-bottom-color: #393939;
+}
+
+[data-carbon-theme="g100"] .cds--header__menu-title:hover,
+[data-carbon-theme="g100"] .cds--header__menu-item:hover {
+  background-color: #353535;
+  color: #ffffff;
+}
+
+[data-carbon-theme="g100"] .cds--header__action {
+  color: #f4f4f4;
+}
+
+[data-carbon-theme="g100"] .cds--header__action:hover {
+  background-color: #353535;
+}
+
+/* 2. PasswordInput show/hide button — nudge up 10px to align with input field. */
+.cds--password-input-wrapper {
+  position: relative;
+}
+
+/* Carbon v11 uses this class for the visibility toggle button */
+.cds--text-input--password__visibility__toggle {
+  top: -10px !important;
+}
+
+.cds--password-input__show-password {
+  position: absolute;
+  inset-inline-end: 0;
+  top: -10px;
+  block-size: 2.5rem;
+  inline-size: 2.5rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cds-icon-primary, #161616);
+  outline: none;
+}
+
+.cds--password-input__show-password:hover {
+  background: var(--cds-background-hover, rgba(141, 141, 141, 0.12));
+}
+
+.cds--password-input__show-password:focus {
+  outline: 2px solid var(--cds-focus, #0f62fe);
+  outline-offset: -2px;
+}

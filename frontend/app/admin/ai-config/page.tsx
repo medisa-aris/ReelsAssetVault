@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import { PageLayout } from "@/components/PageLayout";
 import { useNotification } from "@/components/NotificationProvider";
-import { Button, InlineNotification, Tile } from "@carbon/react";
+import {
+  Button,
+  InlineNotification,
+  Tile,
+  TextInput,
+  PasswordInput,
+  Select,
+  SelectItem,
+} from "@carbon/react";
 import { api } from "@/lib/api";
 import type { AiConfig } from "@/lib/types";
 
@@ -88,23 +96,34 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
   const showBaseUrl = config.provider === "ollama" || config.provider === "kimi";
 
   return (
-    <Tile style={{ borderLeft: config.is_active ? "3px solid var(--cds-interactive)" : undefined }}>
+    <Tile style={{
+      borderLeft: config.is_active ? "3px solid var(--cds-interactive)" : undefined,
+      backgroundColor: editing ? "#ffffff" : undefined,
+    }}>
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1rem" }}>
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="font-semibold text-gray-900">{PROVIDER_LABELS[config.provider] ?? config.provider}</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <h2 style={{ fontWeight: 600, fontSize: "1rem", color: "var(--cds-text-primary)" }}>
+              {PROVIDER_LABELS[config.provider] ?? config.provider}
+            </h2>
             {config.is_active && (
-              <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: "4px",
+                fontSize: "0.75rem", backgroundColor: "#defbe6", color: "#0e6027",
+                padding: "2px 8px", borderRadius: "9999px", fontWeight: 500,
+              }}>
+                <span style={{ width: "6px", height: "6px", backgroundColor: "#24a148", borderRadius: "50%", display: "inline-block" }} />
                 Active
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-400 mt-0.5 font-mono">{config.provider}</p>
+          <p style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)", marginTop: "2px", fontFamily: "monospace" }}>
+            {config.provider}
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {!config.is_active && (
             <Button kind="primary" size="sm" onClick={handleActivate} disabled={activating}>
               {activating ? "Activating…" : "Set Active"}
@@ -125,64 +144,60 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
         </div>
       </div>
 
-      {/* Current values (read mode) */}
+      {/* Read mode */}
       {!editing && (
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
           <div>
-            <dt className="text-xs text-gray-400 font-medium">Model</dt>
-            <dd className="text-gray-700 font-mono text-xs mt-0.5">{config.model ?? "—"}</dd>
+            <dt style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)", fontWeight: 500 }}>Model</dt>
+            <dd style={{ fontSize: "0.75rem", fontFamily: "monospace", color: "var(--cds-text-primary)", marginTop: "2px" }}>
+              {config.model ?? "—"}
+            </dd>
           </div>
           <div>
-            <dt className="text-xs text-gray-400 font-medium">API Key</dt>
-            <dd className="text-gray-700 font-mono text-xs mt-0.5">
-              {config.api_key ? config.api_key : <span className="italic text-gray-400">not set</span>}
+            <dt style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)", fontWeight: 500 }}>API Key</dt>
+            <dd style={{ fontSize: "0.75rem", fontFamily: "monospace", color: "var(--cds-text-primary)", marginTop: "2px" }}>
+              {config.api_key ? config.api_key : <span style={{ fontStyle: "italic", color: "var(--cds-text-secondary)" }}>not set</span>}
             </dd>
           </div>
           {showBaseUrl && (
-            <div className="col-span-2">
-              <dt className="text-xs text-gray-400 font-medium">Base URL</dt>
-              <dd className="text-gray-700 font-mono text-xs mt-0.5">{config.base_url ?? "—"}</dd>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <dt style={{ fontSize: "0.75rem", color: "var(--cds-text-secondary)", fontWeight: 500 }}>Base URL</dt>
+              <dd style={{ fontSize: "0.75rem", fontFamily: "monospace", color: "var(--cds-text-primary)", marginTop: "2px" }}>
+                {config.base_url ?? "—"}
+              </dd>
             </div>
           )}
-        </dl>
+        </div>
       )}
 
       {/* Edit form */}
       {editing && (
-        <div className="space-y-3 border-t border-gray-100 pt-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">API Key</label>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder={config.api_key ? "Leave blank to keep current" : "Enter API key…"}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Model</label>
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              {models.map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
-          </div>
+        <div style={{ borderTop: "1px solid var(--cds-border-subtle)", paddingTop: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <PasswordInput
+            id={`api-key-${config.id}`}
+            labelText="API Key"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder={config.api_key ? "Leave blank to keep current" : "Enter API key…"}
+          />
+          <Select
+            id={`model-${config.id}`}
+            labelText="Model"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+          >
+            {models.map((m) => <SelectItem key={m} value={m} text={m} />)}
+          </Select>
           {showBaseUrl && (
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Base URL</label>
-              <input
-                type="url"
-                value={baseUrl}
-                onChange={(e) => setBaseUrl(e.target.value)}
-                placeholder="https://api.example.com/v1"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
+            <TextInput
+              id={`base-url-${config.id}`}
+              labelText="Base URL"
+              value={baseUrl}
+              onChange={(e) => setBaseUrl(e.target.value)}
+              placeholder="https://api.example.com/v1"
+            />
           )}
-          <div className="flex justify-end">
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <Button kind="primary" size="sm" onClick={handleSave} disabled={saving}>
               {saving ? "Saving…" : "Save"}
             </Button>
@@ -192,7 +207,11 @@ function ConfigCard({ config, onUpdate, onActivate }: ConfigCardProps) {
 
       {/* Test result */}
       {testResult && (
-        <div className={`mt-3 rounded-lg px-3 py-2 text-xs ${testResult.success ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
+        <div style={{
+          marginTop: "12px", borderRadius: "8px", padding: "8px 12px", fontSize: "0.75rem",
+          backgroundColor: testResult.success ? "#defbe6" : "#fff1f1",
+          color: testResult.success ? "#0e6027" : "#da1e28",
+        }}>
           {testResult.success ? "✓ " : "✗ "}{testResult.message}
         </div>
       )}
@@ -221,30 +240,28 @@ export default function AiConfigPage() {
   };
 
   const handleActivate = (activeId: string) => {
-    setConfigs((prev) =>
-      prev.map((c) => ({ ...c, is_active: c.id === activeId }))
-    );
+    setConfigs((prev) => prev.map((c) => ({ ...c, is_active: c.id === activeId })));
   };
 
   return (
     <>
       <Navigation />
       <PageLayout maxWidth="md">
-        <div className="mb-6">
+        <div style={{ marginBottom: "1.5rem" }}>
           <h1 className="cds--type-productive-heading-04">AI Configuration</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p style={{ fontSize: "0.875rem", color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
             Configure which AI provider is used for content generation. Only one provider can be active at a time.
           </p>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center h-48">
-            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "12rem" }}>
+            <p style={{ color: "var(--cds-text-secondary)", fontSize: "0.875rem" }}>Loading…</p>
           </div>
         ) : error ? (
           <InlineNotification kind="error" title={error} />
         ) : (
-          <div className="space-y-4">
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {configs.map((config) => (
               <ConfigCard
                 key={config.id}

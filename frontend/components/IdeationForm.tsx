@@ -7,8 +7,6 @@ import {
   TextArea,
   Select,
   SelectItem,
-  DatePicker,
-  DatePickerInput,
   Button,
   InlineNotification,
 } from "@carbon/react";
@@ -143,11 +141,8 @@ export default function IdeationForm({ initial, onSubmit, submitLabel = "Save", 
         placeholder="e.g. Save this for later, Follow for more!" disabled={loading} style={gap} />
 
       <div style={twoCol}>
-        <DatePicker datePickerType="single" value={form.upload_date}
-          onChange={(dates: Date[]) => { if (dates[0]) set("upload_date", dates[0].toISOString().slice(0, 10)); }}>
-          <DatePickerInput id="ideation-upload-date" labelText="Upload Date" placeholder="YYYY-MM-DD" />
-        </DatePicker>
-        {/* Carbon TimePicker is for AM/PM; use TextInput type="time" for 24h */}
+        <TextInput id="ideation-upload-date" labelText="Upload Date" type="date"
+          value={form.upload_date} onChange={(e) => set("upload_date", e.target.value)} />
         <TextInput id="ideation-upload-time" labelText="Upload Time" type="time"
           value={form.upload_time} onChange={(e) => set("upload_time", e.target.value)} />
       </div>

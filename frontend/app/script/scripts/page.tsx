@@ -4,13 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import { PageLayout } from "@/components/PageLayout";
-import { Button, InlineNotification } from "@carbon/react";
+import { Button, Search, InlineNotification } from "@carbon/react";
 import { useScripts } from "@/hooks/useScripts";
 import { formatDate } from "@/lib/utils";
 
 export default function ScriptListPage() {
   const [search, setSearch] = useState("");
-  const { scripts, total, page, loading, error, setPage, refetch } = useScripts({
+  const { scripts, total, page, loading, error, setPage } = useScripts({
     search: search || undefined,
   });
 
@@ -21,88 +21,84 @@ export default function ScriptListPage() {
       <Navigation />
       <PageLayout maxWidth="max">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
           <div>
             <h1 className="cds--type-productive-heading-04">Scripts</h1>
             {!loading && !error && (
-              <p className="text-sm text-gray-500 mt-0.5">{total} script{total !== 1 ? "s" : ""}</p>
+              <p style={{ fontSize: "0.875rem", color: "var(--cds-text-secondary)", marginTop: "0.25rem" }}>
+                {total} script{total !== 1 ? "s" : ""}
+              </p>
             )}
           </div>
         </div>
 
         {/* Search */}
-        <div className="mb-5">
-          <input
-            type="search"
+        <div style={{ marginBottom: "1.25rem" }}>
+          <Search
+            id="scripts-search"
+            labelText="Search scripts"
+            placeholder="Search scripts…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search scripts…"
-            className="w-full max-w-sm rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            size="md"
+            style={{ maxWidth: "20rem" }}
           />
         </div>
 
         {/* Table */}
         {loading ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
-            <div className="inline-block w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-            <p className="mt-3 text-sm text-gray-500">Loading scripts…</p>
+          <div style={{ backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #e0e0e0", padding: "4rem", textAlign: "center" }}>
+            <p style={{ fontSize: "0.875rem", color: "var(--cds-text-secondary)" }}>Loading scripts…</p>
           </div>
         ) : error ? (
           <InlineNotification kind="error" title={error} />
         ) : scripts.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
-            <p className="text-gray-400 text-sm">No scripts yet. Generate one from an ideation!</p>
-            <Link href="/script/ideation" className="mt-3 inline-block text-sm text-indigo-600 hover:underline">
+          <div style={{ backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #e0e0e0", padding: "4rem", textAlign: "center" }}>
+            <p style={{ color: "var(--cds-text-secondary)", fontSize: "0.875rem" }}>No scripts yet. Generate one from an ideation!</p>
+            <Link href="/script/ideation" style={{ marginTop: "0.75rem", display: "inline-block", fontSize: "0.875rem", color: "#0f62fe" }}>
               Go to Ideation →
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+          <div style={{ backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #e0e0e0", overflow: "hidden" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ minWidth: "100%", fontSize: "0.875rem", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">Title</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">Source Ideation</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">Created</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">Actions</th>
+                  <tr style={{ borderBottom: "1px solid #e0e0e0", backgroundColor: "#f4f4f4" }}>
+                    <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 500, color: "var(--cds-text-secondary)" }}>Title</th>
+                    <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 500, color: "var(--cds-text-secondary)" }}>Source Ideation</th>
+                    <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 500, color: "var(--cds-text-secondary)" }}>Created</th>
+                    <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 500, color: "var(--cds-text-secondary)" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {scripts.map((script) => (
-                    <tr key={script.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3">
+                    <tr key={script.id} style={{ borderBottom: "1px solid #f4f4f4" }}>
+                      <td style={{ padding: "12px 16px" }}>
                         <Link
                           href={`/script/scripts/${script.id}`}
-                          className="font-medium text-gray-900 hover:text-indigo-600 transition-colors"
+                          style={{ fontWeight: 500, color: "#161616" }}
                         >
                           {script.title}
                         </Link>
                         {script.is_ai_generated && (
-                          <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded font-medium">AI</span>
+                          <span style={{ marginLeft: "8px", fontSize: "0.75rem", backgroundColor: "#f0e6ff", color: "#6929c4", padding: "2px 6px", borderRadius: "4px", fontWeight: 500 }}>AI</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-gray-500">
+                      <td style={{ padding: "12px 16px", color: "var(--cds-text-secondary)" }}>
                         {script.ideation_title ? (
-                          <Link
-                            href={`/script/ideation/${script.ideation_id}`}
-                            className="hover:text-indigo-600 transition-colors"
-                          >
+                          <Link href={`/script/ideation/${script.ideation_id}`} style={{ color: "var(--cds-text-secondary)" }}>
                             {script.ideation_title}
                           </Link>
                         ) : "—"}
                       </td>
-                      <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                      <td style={{ padding: "12px 16px", color: "var(--cds-text-secondary)", whiteSpace: "nowrap" }}>
                         {formatDate(script.created_at)}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <Button kind="ghost" size="sm" onClick={() => {}}>
-                            <Link href={`/script/scripts/${script.id}`}>View</Link>
-                          </Button>
-                          <Button kind="ghost" size="sm" onClick={() => {}}>
-                            <Link href={`/script/scripts/${script.id}?mode=edit`}>Edit</Link>
-                          </Button>
+                      <td style={{ padding: "12px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                          <Link href={`/script/scripts/${script.id}`} style={{ fontSize: "0.875rem", color: "#0f62fe" }}>View</Link>
+                          <Link href={`/script/scripts/${script.id}?mode=edit`} style={{ fontSize: "0.875rem", color: "#0f62fe" }}>Edit</Link>
                         </div>
                       </td>
                     </tr>
@@ -113,23 +109,13 @@ export default function ScriptListPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between text-sm text-gray-500">
+              <div style={{ padding: "12px 16px", borderTop: "1px solid #e0e0e0", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.875rem", color: "var(--cds-text-secondary)" }}>
                 <span>Page {page} of {totalPages} · {total} scripts</span>
-                <div className="flex gap-2">
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    onClick={() => setPage(page - 1)}
-                    disabled={page <= 1}
-                  >
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <Button kind="ghost" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1}>
                     Previous
                   </Button>
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    onClick={() => setPage(page + 1)}
-                    disabled={page >= totalPages}
-                  >
+                  <Button kind="ghost" size="sm" onClick={() => setPage(page + 1)} disabled={page >= totalPages}>
                     Next
                   </Button>
                 </div>
